@@ -57,6 +57,29 @@ class RoadmapElementServices {
     }).toList();
   }
 
+  Future<List<RoadmapElementModel>> getRoadmapElemet(int id) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT * 
+        FROM $_tableName
+        WHERE id = ?
+      ''',
+      [id],
+    );
+
+    return maps.map((map) {
+      return RoadmapElementModel(
+        id: map["id"] as int,
+        roadmapId: map["roadmapId"] as int,
+        name: map["name"] as String,
+        description: map["description"] as String,
+        isCompleted: map["isCompleted"] as int,
+      );
+    }).toList();
+  }
+
   Future<void> addNewRoadmapElement(int roadmapId, String name, String description) async {
     final db = await database;
 
@@ -72,6 +95,20 @@ class RoadmapElementServices {
     );
   }
 
+  Future<void> updateRoadmapElement(int id, String name, String description) async {
+    final db = await database;
+
+    await db.update(
+      _tableName,
+      {
+        "name": name,
+        "description": description,
+      },
+      where: "id = ?",
+      whereArgs: [id],
+    );
+  }
+
   Future<void> updateIsCompleted(int id, int value) async {
     final db = await database;
 
@@ -80,6 +117,16 @@ class RoadmapElementServices {
       {
         "isCompleted": value,
       },
+      where: "id = ?",
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteRoadmapElement(int id) async {
+    final db = await database;
+
+    await db.delete(
+      _tableName,
       where: "id = ?",
       whereArgs: [id],
     );

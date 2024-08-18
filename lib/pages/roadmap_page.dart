@@ -121,11 +121,20 @@ class _RoadmapPageState extends State<RoadmapPage> {
                         isCompleted: state.roadmapElement[index].isCompleted,
                         isFirst: index == 0 ? true : false,
                         isLast: index == state.roadmapElement.length - 1 ? true : false,
+                        index: index,
                       ),
                     ],
                   ),
                 );
               },
+            );
+          }
+          if (state is RoadmapElementError) {
+            return Center(
+              child: Text(
+                state.message,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
             );
           }
           return const Text("error");

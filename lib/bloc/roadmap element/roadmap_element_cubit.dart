@@ -16,6 +16,17 @@ class RoadmapElementCubit extends Cubit<RoadmapElementState> {
     }
   }
 
+  Future<void> fetchRoadmapElement(int id) async {
+    emit(RoadmapElementLoading());
+    try {
+      final List<RoadmapElementModel> roadmapElements =
+          await roadmapElementServices.getRoadmapElemet(id);
+      emit(RoadmapElementLoaded(roadmapElements));
+    } catch (e) {
+      emit(RoadmapElementError(e.toString()));
+    }
+  }
+
   Future<void> addRoadmapElement(int roadmapId, String name, String description) async {
     emit(RoadmapElementLoading());
     try {
@@ -25,6 +36,20 @@ class RoadmapElementCubit extends Cubit<RoadmapElementState> {
         description,
       );
       fetchRoadmapElements(roadmapId);
+    } catch (e) {
+      emit(RoadmapElementError(e.toString()));
+    }
+  }
+
+  void updateRoadmapElement(int id, String name, String description) async {
+    emit(RoadmapElementLoading());
+    try {
+      await roadmapElementServices.updateRoadmapElement(
+        id,
+        name,
+        description,
+      );
+      fetchRoadmapElement(id);
     } catch (e) {
       emit(RoadmapElementError(e.toString()));
     }
@@ -40,23 +65,6 @@ class RoadmapElementCubit extends Cubit<RoadmapElementState> {
     }
   }
 
-  /*
-  void updateRoadmapElement(String name, String description, int id) async {
-    emit(RoadmapElementLoading());
-    try {
-      await roadmapElementServices.updateRoadmapElement(
-        id,
-        name,
-        description,
-      );
-      fetchRoadmapElement(id);
-    } catch (e) {
-      emit(RoadmapElementError(e.toString()));
-    }
-  }
-  */
-
-  /*
   void deleteRoadmapElement(int id) async {
     emit(RoadmapElementLoading());
     try {
@@ -66,7 +74,6 @@ class RoadmapElementCubit extends Cubit<RoadmapElementState> {
       emit(RoadmapElementError(e.toString()));
     }
   }
-  */
 
   Future<double> getPercentageCompleted(int roadmapId) async {
     final result = await roadmapElementServices.getPercentageCompleted(roadmapId);

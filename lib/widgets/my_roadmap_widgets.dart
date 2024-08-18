@@ -11,6 +11,7 @@ class MyRoadmapWidget extends StatelessWidget {
   final int isCompleted;
   final bool isFirst;
   final bool isLast;
+  final int index;
 
   const MyRoadmapWidget({
     super.key,
@@ -21,6 +22,7 @@ class MyRoadmapWidget extends StatelessWidget {
     required this.isCompleted,
     required this.isFirst,
     required this.isLast,
+    required this.index,
   });
 
   @override
@@ -64,7 +66,10 @@ class MyRoadmapWidget extends StatelessWidget {
               Navigator.pushNamed(
                 context,
                 "/aboutRoadmapElementPage",
-                arguments: id,
+                arguments: {
+                  "id": id,
+                  "index": index,
+                },
               );
             },
             child: Ink(
