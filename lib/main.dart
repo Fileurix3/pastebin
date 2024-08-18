@@ -1,9 +1,6 @@
+import 'package:custom_roadmap/bloc/custom%20roadmap/custom_roadmap_state.dart';
 import 'package:custom_roadmap/bloc/roadmap%20element/roadmap_element_state.dart';
-import 'package:custom_roadmap/bloc/roadmap/roadmap_state.dart';
-import 'package:custom_roadmap/bloc/summary%20roadmap/summary_roadmap_state.dart';
 import 'package:custom_roadmap/bloc/theme/theme_state.dart';
-import 'package:custom_roadmap/pages/about_roadmap_element_page.dart';
-import 'package:custom_roadmap/pages/add_new_roadmap_page.dart';
 import 'package:custom_roadmap/pages/home_page.dart';
 import 'package:custom_roadmap/pages/roadmap_page.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +17,8 @@ void main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
-        BlocProvider<RoadmapCubit>(create: (_) => RoadmapCubit()),
         BlocProvider<RoadmapElementCubit>(create: (_) => RoadmapElementCubit()),
-        BlocProvider<SummaryRoadmapCubit>(create: (_) => SummaryRoadmapCubit()),
+        BlocProvider<CustomRoadmapCubit>(create: (_) => CustomRoadmapCubit()),
       ],
       child: MyApp(
         sharedPreferences: prefs,
@@ -44,11 +40,8 @@ class MyApp extends StatelessWidget {
           theme: state.darkTheme == false ? lightTheme : darkTheme,
           home: const HomePage(),
           routes: {
-            "/homePage": (context) => const HomePage(),
             "/roadmapPage": (context) => const RoadmapPage(),
-            "/aboutRoadmapElementPage": (context) =>
-                const AboutRoadmapElementPage(),
-            "/addNewRoadmapPage": (context) => const AddNewRoadmapPage(),
+            //"/aboutRoadmapElementPage": (context) => const AboutRoadmapElementPage(),
           },
         );
       },

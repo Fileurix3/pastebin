@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 const TextTheme textTheme = TextTheme(
   titleLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w500),
   labelLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+  //
   labelMedium: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
-
-  //input text
   bodyMedium: TextStyle(fontSize: 18),
 );
 
-ButtonStyle elevationButtonStyle(Color mainColor, Color textColor) =>
-    ButtonStyle(
+ButtonStyle elevationButtonStyle(Color mainColor, Color textColor) => ButtonStyle(
       textStyle: WidgetStateProperty.all<TextStyle>(
         const TextStyle(fontSize: 20),
       ),

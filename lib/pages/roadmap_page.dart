@@ -1,5 +1,5 @@
-import 'package:custom_roadmap/bloc/roadmap/roadmap_state.dart';
-import 'package:custom_roadmap/widgets/my_roadmap_widget.dart';
+import 'package:custom_roadmap/bloc/roadmap%20element/roadmap_element_state.dart';
+import 'package:custom_roadmap/widgets/my_roadmap_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,21 +11,22 @@ class RoadmapPage extends StatefulWidget {
 }
 
 class _RoadmapPageState extends State<RoadmapPage> {
-  late String roadmapName;
-
-  TextEditingController roadmapElementNameController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
 
-  int? selectedItemId;
+  late String roadmapName;
+  late int roadmapId;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    roadmapName = ModalRoute.of(context)!.settings.arguments as String;
-    context.read<RoadmapCubit>().fetchRoadmap(roadmapName);
+    final argument = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    roadmapId = argument["id"];
+    roadmapName = argument["name"];
+    context.read<RoadmapElementCubit>().fetchRoadmapElements(argument["id"]);
   }
 
-  void addRoadmapElementAlert() {
+  void addRoadmapElement() {
     showDialog(
       context: context,
       builder: (coontext) {
@@ -35,15 +36,18 @@ class _RoadmapPageState extends State<RoadmapPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: roadmapElementNameController,
-                decoration:
-                    const InputDecoration(labelText: "Roadmap element name"),
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: "name",
+                ),
                 style: Theme.of(context).textTheme.bodyMedium,
                 maxLength: 50,
               ),
               TextField(
                 controller: descriptionController,
-                decoration: const InputDecoration(labelText: "Description"),
+                decoration: const InputDecoration(
+                  labelText: "description",
+                ),
                 style: Theme.of(context).textTheme.bodyMedium,
                 minLines: 1,
                 maxLines: 5,
@@ -53,19 +57,18 @@ class _RoadmapPageState extends State<RoadmapPage> {
           actions: [
             ElevatedButton(
               onPressed: () {
-                if (roadmapElementNameController.text.isNotEmpty &&
-                    descriptionController.text.isNotEmpty) {
-                  context.read<RoadmapCubit>().addNewRoadmapAndRoadmapElement(
-                        roadmapElementNameController.text,
+                if (nameController.text.isNotEmpty && descriptionController.text.isNotEmpty) {
+                  context.read<RoadmapElementCubit>().addRoadmapElement(
+                        roadmapId,
+                        nameController.text,
                         descriptionController.text,
-                        roadmapName,
                       );
                   Navigator.pop(context);
-                  roadmapElementNameController.clear();
+                  nameController.clear();
                   descriptionController.clear();
                 }
               },
-              child: const Center(child: Text("Add")),
+              child: const Center(child: Text("Add element")),
             )
           ],
         );
@@ -81,20 +84,28 @@ class _RoadmapPageState extends State<RoadmapPage> {
           roadmapName,
         ),
       ),
-      body: BlocBuilder<RoadmapCubit, RoadmapState>(
+      body: BlocBuilder<RoadmapElementCubit, RoadmapElementState>(
         builder: (context, state) {
-          if (state is RoadmapLoading) {
+          if (state is RoadmapElementLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is RoadmapError) {
+          } else if (state is RoadmapElementError) {
             return Center(
               child: Text(
                 state.message,
                 style: Theme.of(context).textTheme.labelMedium,
               ),
             );
-          } else if (state is RoadmapLoaded) {
+          } else if (state is RoadmapElementLoaded) {
+            if (state.roadmapElement.isEmpty) {
+              return Center(
+                child: Text(
+                  "Nothing yet",
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+              );
+            }
             return ListView.builder(
-              itemCount: state.roadmap.length,
+              itemCount: state.roadmapElement.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: EdgeInsets.only(
@@ -103,14 +114,14 @@ class _RoadmapPageState extends State<RoadmapPage> {
                   child: Column(
                     children: [
                       MyRoadmapWidget(
-                        id: state.roadmap[index].id,
-                        title: state.roadmap[index].roadmapElement,
-                        isCompleted: state.roadmap[index].isCompleted,
-                        roadmapElementId: state.roadmap[index].idRoadmapElement,
+                        id: state.roadmapElement[index].id,
+                        roadmapId: state.roadmapElement[index].roadmapId,
+                        title: state.roadmapElement[index].name,
+                        description: state.roadmapElement[index].description,
+                        isCompleted: state.roadmapElement[index].isCompleted,
                         isFirst: index == 0 ? true : false,
-                        isLast:
-                            index == state.roadmap.length - 1 ? true : false,
-                      )
+                        isLast: index == state.roadmapElement.length - 1 ? true : false,
+                      ),
                     ],
                   ),
                 );
@@ -122,7 +133,7 @@ class _RoadmapPageState extends State<RoadmapPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          addRoadmapElementAlert();
+          addRoadmapElement();
         },
         child: const Icon(Icons.add),
       ),

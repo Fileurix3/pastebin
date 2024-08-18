@@ -1,25 +1,50 @@
 part of './roadmap_element_state.dart';
 
 class RoadmapElementCubit extends Cubit<RoadmapElementState> {
-  final CustomRoadmapServices customRoadmapServices = CustomRoadmapServices();
+  final RoadmapElementServices roadmapElementServices = RoadmapElementServices();
 
   RoadmapElementCubit() : super(RoadmapElementState());
 
-  void fetchRoadmapElement(int id) async {
+  Future<void> fetchRoadmapElements(int roadmapId) async {
     emit(RoadmapElementLoading());
     try {
-      final List<CustomRoadmapModel> roadmapElement =
-          await customRoadmapServices.getRoadmapElementById(id);
-      emit(RoadmapElementLoaded(roadmapElement));
+      final List<RoadmapElementModel> roadmapElements =
+          await roadmapElementServices.getRoadmapElemets(roadmapId);
+      emit(RoadmapElementLoaded(roadmapElements));
     } catch (e) {
       emit(RoadmapElementError(e.toString()));
     }
   }
 
+  Future<void> addRoadmapElement(int roadmapId, String name, String description) async {
+    emit(RoadmapElementLoading());
+    try {
+      await roadmapElementServices.addNewRoadmapElement(
+        roadmapId,
+        name,
+        description,
+      );
+      fetchRoadmapElements(roadmapId);
+    } catch (e) {
+      emit(RoadmapElementError(e.toString()));
+    }
+  }
+
+  void updateIsCompleted(int roadmapId, int elementId, int value) async {
+    emit(RoadmapElementLoading());
+    try {
+      await roadmapElementServices.updateIsCompleted(elementId, value);
+      fetchRoadmapElements(roadmapId);
+    } catch (e) {
+      emit(RoadmapElementError(e.toString()));
+    }
+  }
+
+  /*
   void updateRoadmapElement(String name, String description, int id) async {
     emit(RoadmapElementLoading());
     try {
-      await customRoadmapServices.updateRoadmapElement(
+      await roadmapElementServices.updateRoadmapElement(
         id,
         name,
         description,
@@ -29,14 +54,22 @@ class RoadmapElementCubit extends Cubit<RoadmapElementState> {
       emit(RoadmapElementError(e.toString()));
     }
   }
+  */
 
+  /*
   void deleteRoadmapElement(int id) async {
     emit(RoadmapElementLoading());
     try {
-      await customRoadmapServices.deleteRoadmapElement(id);
+      await roadmapElementServices.deleteRoadmapElement(id);
       fetchRoadmapElement(id);
     } catch (e) {
       emit(RoadmapElementError(e.toString()));
     }
+  }
+  */
+
+  Future<double> getPercentageCompleted(int roadmapId) async {
+    final result = await roadmapElementServices.getPercentageCompleted(roadmapId);
+    return result;
   }
 }

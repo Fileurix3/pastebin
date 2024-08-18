@@ -1,13 +1,10 @@
-import 'dart:io';
-
 import 'package:custom_roadmap/model/custom_roadmap_model.dart';
-import 'package:custom_roadmap/model/summary_roadmap_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class CustomRoadmapServices {
   Database? _database;
-  static const _tableName = "CustomRoadmap";
+  static const _tableName = "customRoadmap";
 
   Future<Database> get database async {
     if (_database != null) {
@@ -19,202 +16,70 @@ class CustomRoadmapServices {
 
   Future<Database> _initialize() async {
     String path = join(await getDatabasesPath(), "CustomRoadmap.db");
-    await Directory(dirname(path)).create(recursive: true);
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) {
         return db.execute('''
-        CREATE TABLE $_tableName (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          roadmapName TEXT,
-          idRoadmapElement INTEGER,
-          roadmapElement TEXT,
-          description TEXT,
-          isCompleted INTEGER DEFAULT 0
-        )
+          CREATE TABLE $_tableName (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            roadmapName TEXT,
+            complete REAL DEFAULT 0
+          )
         ''');
       },
     );
   }
 
-  Future<List<SummaryRoadmapModel>> getRoadmaps() async {
+  Future<List<CustomRoadmapModel>> getRoadmaps() async {
     final db = await database;
 
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-    SELECT 
-      roadmapName,
-      COUNT(*) as totalItems,
-      SUM(CASE WHEN isCompleted = 1 THEN 1 ELSE 0 END) as completedItems
-    FROM $_tableName
-    GROUP BY roadmapName
-    ORDER BY id ASC
-    ''');
+        SELECT * FROM $_tableName
+      ''');
 
-    return [
-      for (final {
-            "roadmapName": roadmapName as String,
-            "totalItems": totalItems as int,
-            "completedItems": completedItems as int,
-          } in maps)
-        SummaryRoadmapModel(
-          roadmapName: roadmapName,
-          totalItems: totalItems,
-          completedItems: completedItems,
-        )
-    ];
+    return maps.map((map) {
+      return CustomRoadmapModel(
+        id: map["id"] as int,
+        roadmapName: map["roadmapName"] as String,
+        complete: map["complete"] as double,
+      );
+    }).toList();
   }
 
-  Future<List<CustomRoadmapModel>> getRoadmapByName(String name) async {
+  Future<void> addNewRoadmap(String roadmapName) async {
     final db = await database;
-
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
-      '''
-      SELECT *
-      FROM $_tableName
-      WHERE roadmapName = ?
-      ORDER BY idRoadmapElement ASC
-      ''',
-      [name],
-    );
-
-    return [
-      for (final {
-            "id": id as int,
-            "roadmapName": roadmapName as String,
-            "idRoadmapElement": idRoadmapElement as int,
-            "roadmapElement": roadmapElement as String,
-            "description": description as String,
-            "isCompleted": isCompleted as int,
-          } in maps)
-        CustomRoadmapModel(
-          id: id,
-          roadmapName: roadmapName,
-          idRoadmapElement: idRoadmapElement,
-          roadmapElement: roadmapElement,
-          description: description,
-          isCompleted: isCompleted,
-        )
-    ];
-  }
-
-  Future<List<CustomRoadmapModel>> getRoadmapElementById(int id) async {
-    final db = await database;
-
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
-      '''
-      SELECT *
-      FROM $_tableName
-      WHERE id = ?
-      ''',
-      [id],
-    );
-
-    return [
-      for (final {
-            "id": id as int,
-            "roadmapName": roadmapName as String,
-            "idRoadmapElement": idRoadmapElement as int,
-            "roadmapElement": roadmapElement as String,
-            "description": description as String,
-            "isCompleted": isCompleted as int,
-          } in maps)
-        CustomRoadmapModel(
-          id: id,
-          roadmapName: roadmapName,
-          idRoadmapElement: idRoadmapElement,
-          roadmapElement: roadmapElement,
-          description: description,
-          isCompleted: isCompleted,
-        )
-    ];
-  }
-
-  Future<void> addNewRoadmap(
-      String name, String roadmapElement, String description) async {
-    final db = await database;
-
-    final List<Map<String, dynamic>> result = await db.rawQuery(
-      '''
-    SELECT MAX(idRoadmapElement) as idRoadmapElement
-    FROM $_tableName
-    WHERE roadmapName = ?
-    ''',
-      [name],
-    );
-
-    int idRoadmapElement = (result.first['idRoadmapElement'] ?? 0) + 1;
 
     await db.insert(
       _tableName,
       {
-        "roadmapName": name,
-        "idRoadmapElement": idRoadmapElement,
-        "roadmapElement": roadmapElement,
-        "description": description,
-        "isCompleted": 0,
+        "roadmapName": roadmapName,
       },
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.fail,
     );
   }
 
-  Future<void> updateIsCompleted(int id, int isCompleted) async {
+  Future<void> updateRoadmapName(int id, String name) async {
     final db = await database;
 
     await db.update(
       _tableName,
       {
-        "isCompleted": isCompleted,
+        "roadmapName": name,
       },
       where: "id = ?",
       whereArgs: [id],
     );
   }
 
-  Future<void> updateNameRoadmap(String currentName, String newName) async {
-    final db = await database;
-
-    db.update(
-      _tableName,
-      {"roadmapName": newName},
-      where: "roadmapName = ?",
-      whereArgs: [currentName],
-    );
-  }
-
-  Future<void> updateRoadmapElement(
-      int id, String newName, String description) async {
-    final db = await database;
-
-    db.update(
-      _tableName,
-      {
-        "roadmapElement": newName,
-        "description": description,
-      },
-      where: "id = ?",
-      whereArgs: [id],
-    );
-  }
-
-  Future<void> deleteRoadmapElement(int id) async {
+  Future<void> deleteRoadmap(int id) async {
     final db = await database;
 
     await db.delete(
       _tableName,
       where: "id = ?",
       whereArgs: [id],
-    );
-  }
-
-  Future<void> deleteRoadmapsByName(roadmapName) async {
-    final db = await database;
-
-    await db.delete(
-      _tableName,
-      where: "roadmapName = ?",
-      whereArgs: [roadmapName],
     );
   }
 }
