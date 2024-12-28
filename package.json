@@ -1,0 +1,39 @@
+{
+  "name": "pastebin",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node build/index.js",
+    "build": "npx tsc",
+    "dev": "npx tsx src/index.ts",
+    "test": "mocha ./test/*.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.2",
+    "chai": "^5.1.2",
+    "mocha": "^11.0.1",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "email-validator": "^2.0.4",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "minio": "^8.0.3",
+    "mongoose": "^8.9.2",
+    "redis": "^4.7.0"
+  }
+}
