@@ -1,25 +1,23 @@
 import mongoose, { Schema, Types } from "mongoose";
 
-export interface IUserModel {
+export interface IPostModel {
   _id: Types.ObjectId;
+  creatorId: Types.ObjectId;
   name: string;
-  email: string;
-  password: string;
+  text: string;
   createdAt: Date;
 }
 
-const userSchema = new Schema<IUserModel>({
+const postSchema = new Schema<IPostModel>({
+  creatorId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
-    unique: true,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
+  text: {
     type: String,
     required: true,
   },
@@ -29,4 +27,4 @@ const userSchema = new Schema<IUserModel>({
   },
 });
 
-export const UserModel = mongoose.model<IUserModel>("users", userSchema);
+export const PostModel = mongoose.model<IPostModel>("posts", postSchema);

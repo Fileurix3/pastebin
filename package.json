@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node build/index.js",
     "build": "npx tsc",
-    "dev": "npx tsx src/index.ts",
+    "dev": "nodemon",
     "test": "mocha ./test/*.js"
   },
   "keywords": [],
