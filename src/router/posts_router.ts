@@ -6,5 +6,6 @@ const router = Router();
 const postsServices = new PostsServices();
 
 router.post("/create", authMiddleware, postsServices.createPost);
+router.get("/:postId", postsServices.getPostById);
 
 export default router;

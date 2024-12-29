@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
 import { CustomError, decodeJwt, handlerError } from "../index.js";
+import { IPostModel, PostModel } from "../models/post_model.js";
+import { Request, Response } from "express";
 import { Stream } from "stream";
 import minioClient from "../databases/minio.js";
-import { IPostModel, PostModel } from "../models/post_model.js";
+import mongoose from "mongoose";
 
 export class PostsServices {
   public async createPost(req: Request, res: Response): Promise<void> {
@@ -34,14 +35,41 @@ export class PostsServices {
     }
   }
 
-  public async getPost(req: Request, res: Response): Promise<void> {
+  public async getPostById(req: Request, res: Response): Promise<void> {
     const postId = req.params.postId;
-    try {
-      /*
-      const objectData = new Promise<string>(async (resolve, reject) => {
-        const minioObject: Stream = await minioClient.getObject("posts", name);
 
-        let data = "";
+    try {
+      const postResult = await PostModel.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(postId),
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "creatorId",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $unwind: "$author",
+        },
+      ]);
+
+      const post = postResult[0];
+
+      if (post == null) {
+        throw new CustomError("Post not found", 404);
+      }
+
+      const postText: Promise<string> = new Promise<string>(async (resolve, reject) => {
+        const objectName: string = post.text.split(/\//).pop() as string;
+
+        const minioObject: Stream = await minioClient.getObject("posts", objectName);
+
+        let data: string = "";
 
         minioObject.on("data", (chunk) => {
           data += chunk;
@@ -55,7 +83,16 @@ export class PostsServices {
           reject(err);
         });
       });
-      */
+
+      res.status(200).json({
+        post: {
+          name: post.name,
+          body: await postText,
+        },
+        author: {
+          name: post.author.name,
+        },
+      });
     } catch (err: unknown) {
       handlerError(err, res);
     }
