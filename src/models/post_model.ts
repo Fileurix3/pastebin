@@ -4,7 +4,7 @@ export interface IPostModel {
   _id: Types.ObjectId;
   creatorId: Types.ObjectId;
   name: string;
-  text: string;
+  body: string;
   createdAt: Date;
 }
 
@@ -17,7 +17,7 @@ const postSchema = new Schema<IPostModel>({
     type: String,
     required: true,
   },
-  text: {
+  body: {
     type: String,
     required: true,
   },
