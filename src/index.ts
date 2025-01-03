@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import minioClient from "./databases/minio.js";
 import authRouter from "./router/auth_router.js";
 import postsRouter from "./router/posts_router.js";
+import userRouter from "./router/user_router.js";
 import "dotenv/config";
 
 const app = express();
@@ -25,6 +26,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use("/auth", authRouter);
 app.use("/post", postsRouter);
+app.use("/user", userRouter);
 
 export class CustomError extends Error {
   statusCode: number;

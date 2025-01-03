@@ -5,6 +5,7 @@ export interface IUserModel {
   name: string;
   email: string;
   password: string;
+  avatar: string;
   createdAt: Date;
 }
 
@@ -22,6 +23,10 @@ const userSchema = new Schema<IUserModel>({
   password: {
     type: String,
     required: true,
+  },
+  avatar: {
+    type: String,
+    default: null,
   },
   createdAt: {
     type: Date,
