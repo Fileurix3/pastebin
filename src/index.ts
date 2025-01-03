@@ -4,11 +4,11 @@ import express from "express";
 import mongo from "mongoose";
 import jwt from "jsonwebtoken";
 import minioClient from "./databases/minio.js";
-import authRouter from "./router/auth_router.js";
-import postsRouter from "./router/posts_router.js";
-import userRouter from "./router/user_router.js";
-import "dotenv/config";
+import authRouter from "./services/auth/auth_router.js";
+import postsRouter from "./services/posts/posts_router.js";
+import usersRouter from "./services/users/users_router.js";
 import redisClient from "./databases/redis.js";
+import "dotenv/config";
 
 const app = express();
 
@@ -32,7 +32,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use("/auth", authRouter);
 app.use("/post", postsRouter);
-app.use("/user", userRouter);
+app.use("/user", usersRouter);
 
 export class CustomError extends Error {
   statusCode: number;

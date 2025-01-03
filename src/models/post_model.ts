@@ -3,8 +3,8 @@ import mongoose, { Schema, Types } from "mongoose";
 export interface IPostModel {
   _id: Types.ObjectId;
   creatorId: Types.ObjectId;
-  name: string;
-  body: string;
+  title: string;
+  content: string;
   createdAt: Date;
 }
 
@@ -13,11 +13,11 @@ const postSchema = new Schema<IPostModel>({
     type: Schema.Types.ObjectId,
     required: true,
   },
-  name: {
+  title: {
     type: String,
     required: true,
   },
-  body: {
+  content: {
     type: String,
     required: true,
   },
