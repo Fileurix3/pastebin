@@ -54,7 +54,9 @@ export class UserServices {
       }
 
       if (newName) {
-        const existingName: IUserModel | null = await UserModel.findOne({ name: newName });
+        const existingName: IUserModel | null = await UserModel.findOne({
+          name: newName,
+        });
 
         if (existingName != null) {
           throw new CustomError("This name already exists", 400);

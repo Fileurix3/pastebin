@@ -47,7 +47,7 @@ export class PostsServices {
       if (cachedPost) {
         const post = JSON.parse(cachedPost);
         const postBody = await this.getPostBodyFromMinio(
-          post.post.bodyUrl.split(/\//).pop() as string
+          post.post.bodyUrl.split(/\//).pop() as string,
         );
 
         res.status(200).json({
@@ -91,7 +91,7 @@ export class PostsServices {
       }
 
       const postBody = await this.getPostBodyFromMinio(
-        post.body.split(/\//).pop() as string
+        post.body.split(/\//).pop() as string,
       );
 
       const cachingPost = {

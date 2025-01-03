@@ -43,7 +43,7 @@ export class AuthServices {
         process.env.JWT_SECRET as string,
         {
           expiresIn: "10h",
-        }
+        },
       );
 
       res.cookie("token", token, {
@@ -97,7 +97,7 @@ export class AuthServices {
         process.env.JWT_SECRET as string,
         {
           expiresIn: "175h",
-        }
+        },
       );
 
       res.cookie("token", token, {
