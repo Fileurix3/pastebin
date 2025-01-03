@@ -8,6 +8,7 @@ import authRouter from "./router/auth_router.js";
 import postsRouter from "./router/posts_router.js";
 import userRouter from "./router/user_router.js";
 import "dotenv/config";
+import redisClient from "./databases/redis.js";
 
 const app = express();
 
@@ -15,6 +16,11 @@ mongo
   .connect(process.env.MONGO_URL as string)
   .then(() => console.log("Connection to Mongo was successful"))
   .catch((err: unknown) => console.log(`Mongo error: ` + err));
+
+redisClient
+  .connect()
+  .then(() => console.log("Connected to Redis was successfully"))
+  .catch((err: unknown) => console.log("Redis error: " + err));
 
 minioClient
   .listBuckets()

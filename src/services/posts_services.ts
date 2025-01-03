@@ -2,8 +2,9 @@ import { CustomError, decodeJwt, handlerError } from "../index.js";
 import { IPostModel, PostModel } from "../models/post_model.js";
 import { Request, Response } from "express";
 import { Stream } from "stream";
-import minioClient from "../databases/minio.js";
 import mongoose, { Types } from "mongoose";
+import minioClient from "../databases/minio.js";
+import redisClient from "../databases/redis.js";
 
 export class PostsServices {
   public async createPost(req: Request, res: Response): Promise<void> {
@@ -37,10 +38,33 @@ export class PostsServices {
     }
   }
 
-  public async getPostById(req: Request, res: Response): Promise<void> {
+  public getPostById = async (req: Request, res: Response): Promise<void> => {
     const postId = req.params.postId;
 
     try {
+      const cachedPost = await redisClient.get(`post:${postId}`);
+
+      if (cachedPost) {
+        const post = JSON.parse(cachedPost);
+        const postBody = await this.getPostBodyFromMinio(
+          post.post.bodyUrl.split(/\//).pop() as string
+        );
+
+        res.status(200).json({
+          post: {
+            name: post.post.name,
+            body: postBody,
+            createdAt: post.post.createdAt,
+          },
+          author: {
+            name: post.author.name,
+            avatar: post.author.avatar,
+          },
+        });
+
+        return;
+      }
+
       const postResult = await PostModel.aggregate([
         {
           $match: {
@@ -66,38 +90,58 @@ export class PostsServices {
         throw new CustomError("Post not found", 404);
       }
 
-      const postBody: Promise<string> = new Promise<string>(async (resolve, reject) => {
-        const objectName: string = post.body.split(/\//).pop() as string;
+      const postBody = await this.getPostBodyFromMinio(
+        post.body.split(/\//).pop() as string
+      );
 
-        const minioObject: Stream = await minioClient.getObject("posts", objectName);
+      const cachingPost = {
+        post: {
+          name: post.name,
+          bodyUrl: post.body,
+          createdAt: post.createdAt,
+        },
+        author: {
+          name: post.author.name,
+          avatar: post.author.avatar,
+        },
+      };
 
-        let data: string = "";
-
-        minioObject.on("data", (chunk) => {
-          data += chunk;
-        });
-
-        minioObject.on("end", () => {
-          resolve(data);
-        });
-
-        minioObject.on("error", (err) => {
-          reject(err);
-        });
-      });
+      redisClient.setEx(`post:${postId}`, 3600, JSON.stringify(cachingPost));
 
       res.status(200).json({
         post: {
           name: post.name,
-          body: await postBody,
+          body: postBody,
+          createdAt: post.createdAt,
         },
         author: {
           name: post.author.name,
+          avatar: post.author.avatar,
         },
       });
     } catch (err: unknown) {
       handlerError(err, res);
     }
+  };
+
+  private getPostBodyFromMinio(objectName: string): Promise<string> {
+    return new Promise<string>(async (resolve, reject) => {
+      const minioObject: Stream = await minioClient.getObject("posts", objectName);
+
+      let data: string = "";
+
+      minioObject.on("data", (chunk) => {
+        data += chunk;
+      });
+
+      minioObject.on("end", () => {
+        resolve(data);
+      });
+
+      minioObject.on("error", (err) => {
+        reject(err);
+      });
+    });
   }
 
   public async searchPost(req: Request, res: Response): Promise<void> {
