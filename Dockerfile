@@ -2,11 +2,11 @@ FROM node:22.11.0
 
 WORKDIR /app
 
-COPY package*.json /app
+COPY package*.json .
 
 RUN npm i
 
-COPY ./ ./app
+COPY ./ ./
 
 EXPOSE 3000
 

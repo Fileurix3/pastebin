@@ -1,0 +1,54 @@
+services:
+  app:
+    build: .
+    container_name: pastebin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - redis
+      - minio
+    networks:
+      - pastebin_network
+    env_file:
+      - .env
+
+  mongo:
+    image: mongo:latest
+    container_name: mongoPastebin
+    ports:
+      - "27017:27017"
+    networks:
+      - pastebin_network
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:latest
+    container_name: redisPastebin
+    ports:
+      - "6379:6379"
+    networks:
+      - pastebin_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: minioPastebin
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    networks:
+      - pastebin_network
+    volumes:
+      - minio_data:/data
+    command: server /data
+
+networks:
+  pastebin_network:
+    driver: bridge
+
+volumes:
+  mongo_data: {}
+  minio_data: {}
