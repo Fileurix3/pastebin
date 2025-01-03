@@ -26,7 +26,7 @@ describe("post test", () => {
   it("send an error message when creating a new post if the user is not token", async () => {
     const res = await request(app)
       .post("/post/create")
-      .send({ name: "test post", body: "zxc123zxc" });
+      .send({ title: "test post", content: "zxc123zxc" });
 
     expect(res.status).to.equal(401);
     expect(res.body).to.have.property("message", "Unauthorized");
@@ -35,17 +35,13 @@ describe("post test", () => {
   it("create new post", async () => {
     const res = await request(app)
       .post("/post/create")
-      .send({ name: "testPost", body: "zxc123zxc" })
+      .send({ title: "testPost", content: "zxc123zxc" })
       .set("Cookie", `token=${userToken}`);
 
     expect(res.status).to.equal(201);
     expect(res.body).to.have.property("message", "Post was successfully created");
 
-    const post = await PostModel.findOne({
-      name: "testPost",
-    });
-
-    postId = post._id;
+    postId = res.body.post._id;
   });
 
   it("get post by id", async () => {
@@ -53,13 +49,13 @@ describe("post test", () => {
 
     expect(res.status).to.equal(200);
 
-    expect(res.body.post).to.have.property("name");
-    expect(res.body.post).to.have.property("body");
+    expect(res.body.post).to.have.property("title");
+    expect(res.body.post).to.have.property("content");
 
     expect(res.body).to.have.property("author");
   });
 
-  it("search posts by name element", async () => {
+  it("search posts by title element", async () => {
     const res = await request(app).get(`/post/search/test`);
 
     expect(res.status).to.equal(200);
@@ -70,7 +66,7 @@ describe("post test", () => {
   it("send an error message when update a post if the user is not the author", async () => {
     const res = await request(app)
       .put(`/post/update/${postId}`)
-      .send({ newName: "text zxc 123" })
+      .send({ newTitle: "text zxc 123" })
       .set("Cookie", `token=${userToken2}`);
 
     expect(res.status).to.equal(403);
@@ -80,7 +76,7 @@ describe("post test", () => {
   it("update post", async () => {
     const res = await request(app)
       .put(`/post/update/${postId}`)
-      .send({ newName: "text zxc 123" })
+      .send({ newTitle: "text zxc 123" })
       .set("Cookie", `token=${userToken}`);
 
     expect(res.status).to.equal(200);
@@ -106,6 +102,10 @@ describe("post test", () => {
   });
 
   after(async () => {
+    await PostModel.deleteMany({
+      title: "testPost",
+    });
+
     await UserModel.deleteMany({
       name: "testUser",
     });
