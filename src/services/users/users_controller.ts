@@ -68,4 +68,17 @@ export class UsersController {
       handlerError(err, res);
     }
   };
+
+  public likePost = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userToken = req.cookies.token;
+      const postId = req.params.postId;
+
+      const message = await this.usersServices.likePost(userToken, postId);
+
+      res.status(200).json(message);
+    } catch (err: unknown) {
+      handlerError(err, res);
+    }
+  };
 }

@@ -3,6 +3,7 @@ import { IUserModel, UserModel } from "../../models/user_model.js";
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import bcrypt from "bcrypt";
+import { IPostModel, PostModel } from "../../models/post_model.js";
 
 export class UsersServices {
   public getProfileById = async (userId: string) => {
@@ -98,6 +99,47 @@ export class UsersServices {
     };
   }
 
+  public async likePost(userToken: string, postId: string) {
+    const userId = decodeJwt(userToken).userId;
+    const post: IPostModel | null = await PostModel.findById(postId);
+
+    if (post == null) {
+      throw new CustomError("Post not found", 404);
+    }
+
+    const user: IUserModel | null = await UserModel.findById(userId);
+
+    if (user == null) {
+      throw new CustomError("User not found", 404);
+    }
+
+    const isLiked: boolean = user.likePosts.includes(post._id);
+
+    if (user.likePosts.includes(post._id)) {
+      await UserModel.updateOne(
+        { _id: userId },
+        {
+          $pull: {
+            likePosts: post._id,
+          },
+        },
+      );
+
+      await PostModel.updateOne({ _id: post._id }, { $inc: { likesCount: -1 } });
+
+      return {
+        message: "The post was successfully removed from likes",
+      };
+    }
+
+    await UserModel.updateOne({ _id: userId }, { $addToSet: { likePosts: post._id } });
+    await PostModel.updateOne({ _id: post._id }, { $inc: { likesCount: 1 } });
+
+    return {
+      message: "The post was successfully added to likes",
+    };
+  }
+
   private async getUserProfile(userId: string): Promise<any> {
     const userProfile = await UserModel.aggregate([
       {
@@ -113,7 +155,14 @@ export class UsersServices {
           as: "posts",
         },
       },
-
+      {
+        $lookup: {
+          from: "posts",
+          localField: "likePosts",
+          foreignField: "_id",
+          as: "likePosts",
+        },
+      },
       {
         $project: {
           _id: 1,
@@ -127,6 +176,16 @@ export class UsersServices {
                 _id: "$$posts._id",
                 name: "$$posts.name",
                 createdAt: "$$posts.createdAt",
+              },
+            },
+          },
+          likePosts: {
+            $map: {
+              input: "$likePosts",
+              as: "likePosts",
+              in: {
+                _id: "$$likePosts._id",
+                title: "$$likePosts.title",
               },
             },
           },

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { PostsServices } from "./posts_services.js";
 import { PostsController } from "./posts_controller.js";
 import { authMiddleware } from "../../middleware/auth_middleware.js";
 

@@ -6,6 +6,7 @@ export interface IUserModel {
   email: string;
   password: string;
   avatar: string;
+  likePosts: Types.ObjectId[];
   createdAt: Date;
 }
 
@@ -27,6 +28,10 @@ const userSchema = new Schema<IUserModel>({
   avatar: {
     type: String,
     default: null,
+  },
+  likePosts: {
+    type: [Schema.Types.ObjectId],
+    default: [],
   },
   createdAt: {
     type: Date,

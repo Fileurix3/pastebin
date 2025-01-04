@@ -44,6 +44,7 @@ export class PostsServices {
         post: {
           title: post.post.title,
           content: postBody,
+          likesCount: post.post.likesCount,
           createdAt: post.post.createdAt,
         },
         author: {
@@ -86,6 +87,7 @@ export class PostsServices {
       post: {
         title: post.title,
         contentUrl: post.content,
+        likesCount: post.likesCount,
         createdAt: post.createdAt,
       },
       author: {
@@ -100,6 +102,7 @@ export class PostsServices {
       post: {
         title: post.title,
         content: postBody,
+        likesCount: post.likesCount,
         createdAt: post.createdAt,
       },
       author: {
