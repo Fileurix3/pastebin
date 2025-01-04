@@ -37,7 +37,9 @@ describe("user test", () => {
   });
 
   it("get your profile by jwt token", async () => {
-    const res = await request(app).get("/user/profile").set("Cookie", `token=${userToken}`);
+    const res = await request(app)
+      .get("/user/profile")
+      .set("Cookie", `token=${userToken}`);
 
     expect(res.status).to.equal(200);
 
@@ -100,7 +102,7 @@ describe("user test", () => {
 
     expect(res.body).to.have.property(
       "message",
-      "New password must be different from old password"
+      "New password must be different from old password",
     );
   });
 
@@ -112,6 +114,30 @@ describe("user test", () => {
 
     expect(res.status).to.equal(200);
     expect(res.body).to.have.property("message", "Password was successfully update");
+  });
+
+  it("user like post", async () => {
+    const res = await request(app)
+      .put(`/user/like/post/${postId}`)
+      .set("Cookie", `token=${userToken}`);
+
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property(
+      "message",
+      "The post was successfully added to likes",
+    );
+  });
+
+  it("user removed like post", async () => {
+    const res = await request(app)
+      .put(`/user/like/post/${postId}`)
+      .set("Cookie", `token=${userToken}`);
+
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property(
+      "message",
+      "The post was successfully removed from likes",
+    );
   });
 
   after(async () => {
