@@ -16,12 +16,6 @@ backend pastebin app
   cd pastebin
   ```
 
-- Install dependencies
-
-  ```bash
-  npm i
-  ```
-
 - Add an .env file with these parameters
 
   ```env
@@ -40,15 +34,9 @@ backend pastebin app
   MINIO_SECRET_KEY="minioSecretKey"
   ```
 
-- Compile this app
-
+- Run using docker compose
   ```bash
-  npm run build
-  ```
-
-- Start this app
-  ```bash
-  npm start
+  docker compose up
   ```
 
 ## Dependencies
