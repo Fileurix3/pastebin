@@ -4,6 +4,7 @@ import { Stream } from "stream";
 import mongoose, { Types } from "mongoose";
 import minioClient from "../../databases/minio.js";
 import redisClient from "../../databases/redis.js";
+import { UserModel } from "../../models/user_model.js";
 
 export class PostsServices {
   public async createPost(title: string, content: string, userToken: string) {
@@ -24,6 +25,13 @@ export class PostsServices {
       title: title,
       content: `http://${process.env.MINIO_END_POINT}:${process.env.MINIO_PORT}/posts/${objectName}`,
     });
+
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $addToSet: { posts: { title: post.title, postId: post._id } },
+      },
+    );
 
     return {
       message: "Post was successfully created",
@@ -196,6 +204,15 @@ export class PostsServices {
     await PostModel.deleteOne({
       _id: new Types.ObjectId(postId),
     });
+
+    await UserModel.updateOne(
+      { _id: new Types.ObjectId(userId) },
+      {
+        $pull: {
+          posts: { title: post.title, postId: postId },
+        },
+      },
+    );
 
     return {
       message: "The post was successfully deleted",

@@ -1,30 +1,29 @@
-import { CustomError, decodeJwt, handlerError } from "../../index.js";
+import { CustomError, decodeJwt } from "../../index.js";
 import { IUserModel, UserModel } from "../../models/user_model.js";
-import { Request, Response } from "express";
+import { IPostModel, PostModel } from "../../models/post_model.js";
 import { Types } from "mongoose";
 import bcrypt from "bcrypt";
-import { IPostModel, PostModel } from "../../models/post_model.js";
 
 export class UsersServices {
   public getProfileById = async (userId: string) => {
-    const userProfile = await this.getUserProfile(userId);
+    const userProfile: IUserModel | null = await this.getUserProfile(userId);
 
-    if (!userProfile.length) {
+    if (userProfile == null) {
       throw new CustomError("User not found", 404);
     }
 
-    return userProfile[0];
+    return userProfile;
   };
 
   public getYourProfile = async (userToken: string) => {
     const userId = decodeJwt(userToken).userId;
-    const userProfile = await this.getUserProfile(userId);
+    const userProfile: IUserModel | null = await this.getUserProfile(userId);
 
-    if (!userProfile.length) {
+    if (userProfile == null) {
       throw new CustomError("User not found", 404);
     }
 
-    return userProfile[0];
+    return userProfile;
   };
 
   public async updateUserProfile(
@@ -113,14 +112,18 @@ export class UsersServices {
       throw new CustomError("User not found", 404);
     }
 
-    const isLiked: boolean = user.likePosts.includes(post._id);
-
-    if (user.likePosts.includes(post._id)) {
+    if (
+      user.likePosts.some(
+        (likePost) =>
+          likePost.title == post.title &&
+          likePost.postId.toString() == post._id.toString(),
+      )
+    ) {
       await UserModel.updateOne(
         { _id: userId },
         {
           $pull: {
-            likePosts: post._id,
+            likePosts: { title: post.title, postId: post._id },
           },
         },
       );
@@ -132,7 +135,10 @@ export class UsersServices {
       };
     }
 
-    await UserModel.updateOne({ _id: userId }, { $addToSet: { likePosts: post._id } });
+    await UserModel.updateOne(
+      { _id: userId },
+      { $addToSet: { likePosts: { title: post.title, postId: post._id } } },
+    );
     await PostModel.updateOne({ _id: post._id }, { $inc: { likesCount: 1 } });
 
     return {
@@ -140,58 +146,8 @@ export class UsersServices {
     };
   }
 
-  private async getUserProfile(userId: string): Promise<any> {
-    const userProfile = await UserModel.aggregate([
-      {
-        $match: {
-          _id: new Types.ObjectId(userId),
-        },
-      },
-      {
-        $lookup: {
-          from: "posts",
-          localField: "_id",
-          foreignField: "creatorId",
-          as: "posts",
-        },
-      },
-      {
-        $lookup: {
-          from: "posts",
-          localField: "likePosts",
-          foreignField: "_id",
-          as: "likePosts",
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          avatar: 1,
-          posts: {
-            $map: {
-              input: "$posts",
-              as: "posts",
-              in: {
-                _id: "$$posts._id",
-                name: "$$posts.name",
-                createdAt: "$$posts.createdAt",
-              },
-            },
-          },
-          likePosts: {
-            $map: {
-              input: "$likePosts",
-              as: "likePosts",
-              in: {
-                _id: "$$likePosts._id",
-                title: "$$likePosts.title",
-              },
-            },
-          },
-        },
-      },
-    ]);
+  private async getUserProfile(userId: string): Promise<IUserModel | null> {
+    const userProfile = await UserModel.findOne({ _id: new Types.ObjectId(userId) });
 
     return userProfile;
   }

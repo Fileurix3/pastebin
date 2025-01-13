@@ -6,7 +6,18 @@ export interface IUserModel {
   email: string;
   password: string;
   avatar: string;
-  likePosts: Types.ObjectId[];
+  likePosts: [
+    {
+      title: string;
+      postId: Types.ObjectId;
+    },
+  ];
+  posts: [
+    {
+      title: string;
+      postId: string;
+    },
+  ];
   createdAt: Date;
 }
 
@@ -30,7 +41,35 @@ const userSchema = new Schema<IUserModel>({
     default: null,
   },
   likePosts: {
-    type: [Schema.Types.ObjectId],
+    type: [
+      {
+        _id: false,
+        title: {
+          type: String,
+          required: true,
+        },
+        postId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+      },
+    ],
+    default: [],
+  },
+  posts: {
+    type: [
+      {
+        _id: false,
+        title: {
+          type: String,
+          required: true,
+        },
+        postId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+      },
+    ],
     default: [],
   },
   createdAt: {

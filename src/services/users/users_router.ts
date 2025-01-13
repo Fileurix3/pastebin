@@ -10,5 +10,6 @@ router.get("/profile", authMiddleware, usersController.getYourProfile);
 router.put("/update/profile", authMiddleware, usersController.updateUserProfile);
 router.put("/change/password", authMiddleware, usersController.changePassword);
 router.put("/like/post/:postId", authMiddleware, usersController.likePost);
+//router.put("/subscribe/user/:userId", authMiddleware, usersController.subscribeUser);
 
 export default router;

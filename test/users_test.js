@@ -2,18 +2,27 @@ import { UserModel } from "../build/models/user_model.js";
 import { expect } from "chai";
 import request from "supertest";
 import app, { decodeJwt } from "../build/index.js";
+import { PostModel } from "../build/models/post_model.js";
 
 describe("user test", () => {
   let userToken;
   let userId;
+  let postId;
 
   before(async () => {
-    const res = await request(app)
+    const resAuth = await request(app)
       .post("/auth/register")
       .send({ name: "testUser", password: "testUser", email: "test@gmail.com" });
 
-    userToken = res.body.token;
+    userToken = resAuth.body.token;
     userId = decodeJwt(userToken).userId;
+
+    const resPost = await request(app)
+      .post("/post/create")
+      .send({ title: "testPost", content: "testPost" })
+      .set("Cookie", `token=${userToken}`);
+
+    postId = resPost.body.post._id;
   });
 
   it("get user profile by id", async () => {
@@ -26,6 +35,7 @@ describe("user test", () => {
     expect(res.body.user)
       .to.have.property("avatar")
       .that.satisfies((avatar) => avatar == null || typeof avatar == "string");
+    expect(res.body.user).to.have.property("likePosts");
     expect(res.body.user).to.have.property("posts");
   });
 
@@ -48,6 +58,7 @@ describe("user test", () => {
     expect(res.body.user)
       .to.have.property("avatar")
       .that.satisfies((avatar) => avatar == null || typeof avatar == "string");
+    expect(res.body.user).to.have.property("likePosts");
     expect(res.body.user).to.have.property("posts");
   });
 
@@ -148,5 +159,9 @@ describe("user test", () => {
     await UserModel.deleteMany({
       name: "testUser2",
     });
+
+    await request(app)
+      .delete(`/post/delete/${postId}`)
+      .set("Cookie", `token=${userToken}`);
   });
 });
