@@ -13,7 +13,7 @@ It's a training project. I just do it when I'm bored
 - Go to the folder with this application
 
   ```bash
-  CD-пастабин
+  cd pastebin
   ```
 
 - Add an .env file with these parameters
