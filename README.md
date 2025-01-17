@@ -1,6 +1,6 @@
 # Pastebin
 
-backend pastebin app
+It's a training project. I just do it when I'm bored
 
 ## install
 
@@ -13,7 +13,7 @@ backend pastebin app
 - Go to the folder with this application
 
   ```bash
-  cd pastebin
+  CD-пастабин
   ```
 
 - Add an .env file with these parameters
