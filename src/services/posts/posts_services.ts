@@ -1,10 +1,11 @@
 import { CustomError, decodeJwt } from "../../index.js";
-import { IPostModel, PostModel } from "../../models/post_model.js";
+import { UserLikesModel } from "../../models/users_likes_model.js";
+import { PostModel } from "../../models/post_model.js";
+import { UserModel } from "../../models/user_model.js";
 import { Stream } from "stream";
-import mongoose, { Types } from "mongoose";
+import { Op } from "@sequelize/core";
 import minioClient from "../../databases/minio.js";
 import redisClient from "../../databases/redis.js";
-import { UserModel } from "../../models/user_model.js";
 
 export class PostsServices {
   public async createPost(title: string, content: string, userToken: string) {
@@ -20,18 +21,11 @@ export class PostsServices {
 
     const userId: string = decodeJwt(userToken).userId;
 
-    const post: IPostModel = await PostModel.create({
-      creatorId: userId,
+    const post: PostModel = await PostModel.create({
+      creator_id: userId,
       title: title,
       content: `http://${process.env.MINIO_END_POINT}:${process.env.MINIO_PORT}/posts/${objectName}`,
     });
-
-    await UserModel.updateOne(
-      { _id: userId },
-      {
-        $addToSet: { posts: { title: post.title, postId: post._id } },
-      },
-    );
 
     return {
       message: "Post was successfully created",
@@ -44,80 +38,49 @@ export class PostsServices {
 
     if (cachedPost) {
       const post = JSON.parse(cachedPost);
-      const postBody = await this.getPostBodyFromMinio(
-        post.post.contentUrl.split(/\//).pop() as string,
+      const postContent = await this.getPostBodyFromMinio(
+        post.content.split(/\//).pop() as string,
       );
 
-      return {
-        post: {
-          title: post.post.title,
-          content: postBody,
-          likesCount: post.post.likesCount,
-          createdAt: post.post.createdAt,
-        },
-        author: {
-          name: post.author.name,
-          avatar: post.author.avatar,
-        },
-      };
+      post.content = postContent;
+      return post;
     }
 
-    const postResult = await PostModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(postId),
-        },
+    const countLikes = await UserLikesModel.count({
+      where: {
+        post_id: postId,
       },
-      {
-        $lookup: {
-          from: "users",
-          localField: "creatorId",
-          foreignField: "_id",
-          as: "author",
-        },
-      },
-      {
-        $unwind: "$author",
-      },
-    ]);
+    });
 
-    const post = postResult[0];
+    const post: Record<string, any> | null = await PostModel.findOne({
+      where: {
+        id: postId,
+      },
+      include: [
+        {
+          model: UserModel,
+          as: "creator",
+          attributes: ["id", "name", "avatar_url"],
+          required: true,
+        },
+      ],
+    });
 
     if (post == null) {
       throw new CustomError("Post not found", 404);
     }
 
-    const postBody = await this.getPostBodyFromMinio(
+    const postObj = post.get();
+    postObj.countLikes = countLikes;
+
+    redisClient.setEx(`post:${postId}`, 3600, JSON.stringify(post));
+
+    const postContent = await this.getPostBodyFromMinio(
       post.content.split(/\//).pop() as string,
     );
 
-    const cachingPost = {
-      post: {
-        title: post.title,
-        contentUrl: post.content,
-        likesCount: post.likesCount,
-        createdAt: post.createdAt,
-      },
-      author: {
-        name: post.author.name,
-        avatar: post.author.avatar,
-      },
-    };
-
-    redisClient.setEx(`post:${postId}`, 3600, JSON.stringify(cachingPost));
-
-    return {
-      post: {
-        title: post.title,
-        content: postBody,
-        likesCount: post.likesCount,
-        createdAt: post.createdAt,
-      },
-      author: {
-        name: post.author.name,
-        avatar: post.author.avatar,
-      },
-    };
+    post.content = postContent;
+    return post;
   };
 
   private getPostBodyFromMinio(objectName: string): Promise<string> {
@@ -141,8 +104,10 @@ export class PostsServices {
   }
 
   public async searchPost(searchParams: string) {
-    const posts: IPostModel[] = await PostModel.find({
-      title: { $regex: searchParams, $options: "i" },
+    const posts: PostModel[] = await PostModel.findAll({
+      where: {
+        title: { [Op.like]: searchParams },
+      },
     });
 
     return posts;
@@ -158,17 +123,22 @@ export class PostsServices {
       throw new CustomError("You have to change at least one thing", 400);
     }
 
-    const post: IPostModel | null = await PostModel.findById(postId);
+    const post: PostModel | null = await PostModel.findOne({
+      where: {
+        id: postId,
+      },
+    });
+
     const userId = decodeJwt(userToken).userId;
 
     if (post == null) {
       throw new CustomError("Post not found", 404);
-    } else if (userId != String(post.creatorId)) {
+    } else if (userId != post.creator_id) {
       throw new CustomError("Only the creator edit this post", 403);
     }
 
     if (newTitle) {
-      await PostModel.updateOne({ _id: postId }, { title: newTitle });
+      await PostModel.update({ title: newTitle }, { where: { id: postId } });
     }
 
     if (newContent) {
@@ -176,18 +146,27 @@ export class PostsServices {
       await minioClient.putObject("posts", objectName!, newContent);
     }
 
+    redisClient.del(`post:${postId}`).catch((err) => {
+      console.error("delete the post from redis error: " + err);
+    });
+
     return {
       message: "Post was successfully updated",
     };
   }
 
   public async deletePost(userToken: string, postId: string) {
-    const post: IPostModel | null = await PostModel.findById(postId);
+    const post: PostModel | null = await PostModel.findOne({
+      where: {
+        id: postId,
+      },
+    });
+
     const userId = decodeJwt(userToken).userId;
 
     if (post == null) {
       throw new CustomError("Post not found", 404);
-    } else if (userId != String(post.creatorId)) {
+    } else if (userId != post.creator_id) {
       throw new CustomError("Only the creator delete this post", 403);
     }
 
@@ -201,18 +180,15 @@ export class PostsServices {
       throw new Error(`Error when delete a post: ${err}`);
     });
 
-    await PostModel.deleteOne({
-      _id: new Types.ObjectId(postId),
+    await PostModel.destroy({
+      where: {
+        id: postId,
+      },
     });
 
-    await UserModel.updateOne(
-      { _id: new Types.ObjectId(userId) },
-      {
-        $pull: {
-          posts: { title: post.title, postId: postId },
-        },
-      },
-    );
+    redisClient.del(`post:${postId}`).catch((err) => {
+      console.error("delete the post from redis error: " + err);
+    });
 
     return {
       message: "The post was successfully deleted",

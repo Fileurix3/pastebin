@@ -8,14 +8,15 @@ import authRouter from "./services/auth/auth_router.js";
 import postsRouter from "./services/posts/posts_router.js";
 import usersRouter from "./services/users/users_router.js";
 import redisClient from "./databases/redis.js";
+import sequelize from "./databases/db.js";
 import "dotenv/config";
 
 const app = express();
 
-mongo
-  .connect(process.env.MONGO_URL as string)
-  .then(() => console.log("Connection to Mongo was successful"))
-  .catch((err: unknown) => console.log(`Mongo error: ` + err));
+sequelize
+  .authenticate()
+  .then(() => console.log("Connection to Postgres was successful"))
+  .catch((err: unknown) => console.log(`Postgres error: ` + err));
 
 redisClient
   .connect()

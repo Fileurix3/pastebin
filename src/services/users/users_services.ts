@@ -1,12 +1,13 @@
 import { CustomError, decodeJwt } from "../../index.js";
-import { IUserModel, UserModel } from "../../models/user_model.js";
-import { IPostModel, PostModel } from "../../models/post_model.js";
-import { Types } from "mongoose";
+import { UserLikesModel } from "../../models/users_likes_model.js";
+import { UserModel } from "../../models/user_model.js";
+import { PostModel } from "../../models/post_model.js";
+import { Op } from "@sequelize/core";
 import bcrypt from "bcrypt";
 
 export class UsersServices {
   public getProfileById = async (userId: string) => {
-    const userProfile: IUserModel | null = await this.getUserProfile(userId);
+    const userProfile: UserModel | null = await this.getUserProfile(userId);
 
     if (userProfile == null) {
       throw new CustomError("User not found", 404);
@@ -17,7 +18,7 @@ export class UsersServices {
 
   public getYourProfile = async (userToken: string) => {
     const userId = decodeJwt(userToken).userId;
-    const userProfile: IUserModel | null = await this.getUserProfile(userId);
+    const userProfile: UserModel | null = await this.getUserProfile(userId);
 
     if (userProfile == null) {
       throw new CustomError("User not found", 404);
@@ -38,8 +39,10 @@ export class UsersServices {
     }
 
     if (newName) {
-      const existingName: IUserModel | null = await UserModel.findOne({
-        name: newName,
+      const existingName: UserModel | null = await UserModel.findOne({
+        where: {
+          name: newName,
+        },
       });
 
       if (existingName != null) {
@@ -53,7 +56,7 @@ export class UsersServices {
 
     const userId: string = decodeJwt(userToken).userId;
 
-    await UserModel.updateOne({ _id: userId }, updateFields);
+    await UserModel.update(updateFields, { where: { id: userId } });
 
     return {
       message: "User profile was successfully update",
@@ -77,7 +80,11 @@ export class UsersServices {
 
     const userId = decodeJwt(userToken).userId;
 
-    const user: IUserModel | null = await UserModel.findById(userId);
+    const user: UserModel | null = await UserModel.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
     if (user == null) {
       throw new CustomError("User not found", 404);
@@ -91,7 +98,7 @@ export class UsersServices {
 
     const hashPassword = await bcrypt.hash(newPassword, 10);
 
-    await UserModel.updateOne({ _id: userId }, { password: hashPassword });
+    await UserModel.update({ password: hashPassword }, { where: { id: userId } });
 
     return {
       message: "Password was successfully update",
@@ -100,54 +107,80 @@ export class UsersServices {
 
   public async likePost(userToken: string, postId: string) {
     const userId = decodeJwt(userToken).userId;
-    const post: IPostModel | null = await PostModel.findById(postId);
+    const post: PostModel | null = await PostModel.findOne({
+      where: {
+        id: postId,
+      },
+    });
 
     if (post == null) {
       throw new CustomError("Post not found", 404);
     }
 
-    const user: IUserModel | null = await UserModel.findById(userId);
+    const user: UserModel | null = await UserModel.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
     if (user == null) {
       throw new CustomError("User not found", 404);
     }
 
-    if (
-      user.likePosts.some(
-        (likePost) =>
-          likePost.title == post.title &&
-          likePost.postId.toString() == post._id.toString(),
-      )
-    ) {
-      await UserModel.updateOne(
-        { _id: userId },
-        {
-          $pull: {
-            likePosts: { title: post.title, postId: post._id },
-          },
-        },
-      );
+    const userIsLikePost: UserLikesModel | null = await UserLikesModel.findOne({
+      where: {
+        [Op.and]: [{ user_id: userId }, { post_id: postId }],
+      },
+    });
 
-      await PostModel.updateOne({ _id: post._id }, { $inc: { likesCount: -1 } });
+    if (userIsLikePost != null) {
+      await UserLikesModel.destroy({
+        where: {
+          [Op.and]: [{ user_id: userId }, { post_id: postId }],
+        },
+      });
 
       return {
         message: "The post was successfully removed from likes",
       };
     }
 
-    await UserModel.updateOne(
-      { _id: userId },
-      { $addToSet: { likePosts: { title: post.title, postId: post._id } } },
-    );
-    await PostModel.updateOne({ _id: post._id }, { $inc: { likesCount: 1 } });
+    await UserLikesModel.create({
+      user_id: userId,
+      post_id: postId,
+    });
 
     return {
       message: "The post was successfully added to likes",
     };
   }
 
-  private async getUserProfile(userId: string): Promise<IUserModel | null> {
-    const userProfile = await UserModel.findOne({ _id: new Types.ObjectId(userId) });
+  private async getUserProfile(userId: string): Promise<UserModel | null> {
+    const userProfile: UserModel | null = await UserModel.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["id", "name", "avatar_url", "createdAt"],
+      include: [
+        {
+          model: PostModel,
+          as: "posts",
+          attributes: ["id", "title", "createdAt", "updatedAt"],
+        },
+        {
+          model: UserLikesModel,
+          as: "likedPosts",
+          attributes: ["post_id"],
+          include: [
+            {
+              model: PostModel,
+              attributes: ["title"],
+              as: "post",
+            },
+          ],
+        },
+      ],
+    });
 
     return userProfile;
   }

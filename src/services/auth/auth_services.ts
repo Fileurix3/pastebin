@@ -1,6 +1,7 @@
 import { CustomError, handlerError } from "../../index.js";
-import { UserModel, IUserModel } from "../../models/user_model.js";
+import { UserModel } from "../../models/user_model.js";
 import { Response } from "express";
+import { Op } from "@sequelize/core";
 import validator from "email-validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -17,8 +18,10 @@ export class AuthServices {
       throw new CustomError("Invalid email", 400);
     }
 
-    const existingUser: IUserModel[] = await UserModel.find({
-      $or: [{ name: name }, { email: email }],
+    const existingUser: UserModel[] = await UserModel.findAll({
+      where: {
+        [Op.or]: [{ name: name }, { email: email }],
+      },
     });
 
     if (existingUser.length > 0) {
@@ -27,7 +30,7 @@ export class AuthServices {
 
     const hashPassword: string = await bcrypt.hash(password, 10);
 
-    const newUser: IUserModel = await UserModel.create({
+    const newUser: UserModel = await UserModel.create({
       name: name,
       email: email,
       password: hashPassword,
@@ -35,7 +38,7 @@ export class AuthServices {
 
     const token = jwt.sign(
       {
-        userId: newUser._id,
+        userId: newUser.id,
       },
       process.env.JWT_SECRET as string,
       {
@@ -60,8 +63,10 @@ export class AuthServices {
       throw new CustomError("You have not filled in all the fields", 400);
     }
 
-    const user: IUserModel | null = await UserModel.findOne({
-      email: email,
+    const user: UserModel | null = await UserModel.findOne({
+      where: {
+        email: email,
+      },
     });
 
     if (user == null) {
@@ -76,7 +81,7 @@ export class AuthServices {
 
     const token = jwt.sign(
       {
-        userId: user._id,
+        userId: user.id,
       },
       process.env.JWT_SECRET as string,
       {
@@ -87,12 +92,6 @@ export class AuthServices {
     res.cookie("token", token, {
       maxAge: 7 * 26 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: "lax",
-    });
-
-    res.cookie("registered", true, {
-      maxAge: 7 * 26 * 60 * 60 * 1000,
-      httpOnly: false,
       sameSite: "lax",
     });
 

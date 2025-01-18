@@ -13,7 +13,10 @@ describe("auth test", () => {
 
     expect(res.status).to.equal(400);
 
-    expect(res.body).to.have.property("message", "Password must be at least 6 characters long");
+    expect(res.body).to.have.property(
+      "message",
+      "Password must be at least 6 characters long",
+    );
   });
 
   it("should create a new user", async () => {
@@ -34,7 +37,10 @@ describe("auth test", () => {
 
     expect(res.status).to.equal(400);
 
-    expect(res.body).to.have.property("message", "User with this name or email already exists");
+    expect(res.body).to.have.property(
+      "message",
+      "User with this name or email already exists",
+    );
   });
 
   it("login user", async () => {
@@ -79,8 +85,10 @@ describe("auth test", () => {
   });
 
   after(async () => {
-    await UserModel.deleteMany({
-      name: "testUser",
+    await UserModel.destroy({
+      where: {
+        name: "testUser",
+      },
     });
   });
 });

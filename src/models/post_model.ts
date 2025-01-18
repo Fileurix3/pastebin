@@ -1,35 +1,60 @@
-import mongoose, { Schema, Types } from "mongoose";
+import { DataTypes, Model } from "@sequelize/core";
+import { UserModel } from "./user_model.js";
+import sequelize from "../databases/db.js";
 
-export interface IPostModel {
-  _id: Types.ObjectId;
-  creatorId: Types.ObjectId;
-  likesCount: number;
+interface PostAttributes {
+  id?: string;
+  creator_id: string;
   title: string;
   content: string;
-  createdAt: Date;
 }
 
-const postSchema = new Schema<IPostModel>({
-  creatorId: {
-    type: Schema.Types.ObjectId,
-    required: true,
+export class PostModel extends Model<PostAttributes> implements PostAttributes {
+  public id?: string;
+  public creator_id!: string;
+  public title!: string;
+  public content!: string;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
+
+PostModel.init(
+  {
+    id: {
+      type: DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      unique: true,
+    },
+    creator_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
-  likesCount: {
-    type: Number,
-    default: 0,
+  {
+    sequelize,
+    tableName: "posts",
+    timestamps: true,
   },
-  title: {
-    type: String,
-    required: true,
-  },
-  content: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+);
+
+PostModel.belongsTo(UserModel, {
+  foreignKey: "creator_id",
+  targetKey: "id",
+  as: "creator",
 });
 
-export const PostModel = mongoose.model<IPostModel>("posts", postSchema);
+UserModel.hasMany(PostModel, {
+  foreignKey: "creator_id",
+  sourceKey: "id",
+  as: "posts",
+});

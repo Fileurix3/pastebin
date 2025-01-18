@@ -1,13 +1,16 @@
 import { UserModel } from "../build/models/user_model.js";
-import { expect } from "chai";
-import request from "supertest";
-import app, { decodeJwt } from "../build/index.js";
 import { PostModel } from "../build/models/post_model.js";
+import { expect } from "chai";
+import app, { decodeJwt } from "../build/index.js";
+import request from "supertest";
+
+import minioClient from "../build/databases/minio.js";
 
 describe("user test", () => {
   let userToken;
   let userId;
   let postId;
+  let postMinioName;
 
   before(async () => {
     const resAuth = await request(app)
@@ -22,7 +25,8 @@ describe("user test", () => {
       .send({ title: "testPost", content: "testPost" })
       .set("Cookie", `token=${userToken}`);
 
-    postId = resPost.body.post._id;
+    postId = resPost.body.post.id;
+    postMinioName = resPost.body.post.content.split(/\//).pop();
   });
 
   it("get user profile by id", async () => {
@@ -30,13 +34,15 @@ describe("user test", () => {
 
     expect(res.status).to.equal(200);
 
-    expect(res.body.user).to.have.property("_id");
+    expect(res.body.user).to.have.property("id");
     expect(res.body.user).to.have.property("name");
+    expect(res.body.user).to.have.property("createdAt");
     expect(res.body.user)
-      .to.have.property("avatar")
+      .to.have.property("avatar_url")
       .that.satisfies((avatar) => avatar == null || typeof avatar == "string");
-    expect(res.body.user).to.have.property("likePosts");
+
     expect(res.body.user).to.have.property("posts");
+    expect(res.body.user).to.have.property("likedPosts");
   });
 
   it("throw error message when receiving a profile by jwt token without token", async () => {
@@ -53,13 +59,15 @@ describe("user test", () => {
 
     expect(res.status).to.equal(200);
 
-    expect(res.body.user).to.have.property("_id");
+    expect(res.body.user).to.have.property("id");
     expect(res.body.user).to.have.property("name");
+    expect(res.body.user).to.have.property("createdAt");
     expect(res.body.user)
-      .to.have.property("avatar")
+      .to.have.property("avatar_url")
       .that.satisfies((avatar) => avatar == null || typeof avatar == "string");
-    expect(res.body.user).to.have.property("likePosts");
+
     expect(res.body.user).to.have.property("posts");
+    expect(res.body.user).to.have.property("likedPosts");
   });
 
   it("update name if this name already exists", async () => {
@@ -77,8 +85,10 @@ describe("user test", () => {
     expect(res.status).to.equal(400);
     expect(res.body).to.have.property("message", "This name already exists");
 
-    await UserModel.deleteMany({
-      name: "testUser2",
+    await UserModel.destroy({
+      where: {
+        name: "testUser2",
+      },
     });
   });
 
@@ -152,12 +162,24 @@ describe("user test", () => {
   });
 
   after(async () => {
-    await UserModel.deleteMany({
-      name: "testUser",
+    await PostModel.destroy({
+      where: {
+        creator_id: userId,
+      },
     });
 
-    await UserModel.deleteMany({
-      name: "testUser2",
+    await minioClient.removeObject("posts", postMinioName);
+
+    await UserModel.destroy({
+      where: {
+        name: "testUser",
+      },
+    });
+
+    await UserModel.destroy({
+      where: {
+        name: "testUser2",
+      },
     });
 
     await request(app)

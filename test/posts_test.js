@@ -3,11 +3,13 @@ import { expect } from "chai";
 import request from "supertest";
 import app from "../build/index.js";
 import { PostModel } from "../build/models/post_model.js";
+import minioClient from "../build/databases/minio.js";
 
 describe("post test", () => {
   let userToken;
   let userToken2;
   let postId;
+  let postMinioName;
 
   before(async () => {
     const res = await request(app)
@@ -41,7 +43,8 @@ describe("post test", () => {
     expect(res.status).to.equal(201);
     expect(res.body).to.have.property("message", "Post was successfully created");
 
-    postId = res.body.post._id;
+    postId = res.body.post.id;
+    postMinioName = res.body.post.content.split(/\//).pop();
   });
 
   it("get post by id", async () => {
@@ -49,10 +52,15 @@ describe("post test", () => {
 
     expect(res.status).to.equal(200);
 
-    expect(res.body.post).to.have.property("title");
-    expect(res.body.post).to.have.property("content");
+    expect(res.body).to.have.property("id");
+    expect(res.body).to.have.property("title");
+    expect(res.body).to.have.property("content");
+    expect(res.body).to.have.property("countLikes");
 
-    expect(res.body).to.have.property("author");
+    expect(res.body).to.have.property("creator");
+    expect(res.body.creator).to.have.property("id");
+    expect(res.body.creator).to.have.property("name");
+    expect(res.body.creator).to.have.property("avatar_url");
   });
 
   it("search posts by title element", async () => {
@@ -102,16 +110,24 @@ describe("post test", () => {
   });
 
   after(async () => {
-    await PostModel.deleteMany({
-      title: "testPost",
+    await PostModel.destroy({
+      where: {
+        title: "testPost",
+      },
     });
 
-    await UserModel.deleteMany({
-      name: "testUser",
+    await minioClient.removeObject("posts", postMinioName);
+
+    await UserModel.destroy({
+      where: {
+        name: "testUser",
+      },
     });
 
-    await UserModel.deleteMany({
-      name: "testUser2",
+    await UserModel.destroy({
+      where: {
+        name: "testUser2",
+      },
     });
   });
 });
