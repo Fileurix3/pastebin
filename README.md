@@ -22,12 +22,16 @@ It's a training project. I just do it when I'm bored
   COOKIE_SECRET="pastebin"
   JWT_SECRET="pastebin"
 
-  MONGO_URL="mongodb://mongoPastebin:27017/pastebin"
+  DB_NAME="pastebin"
+  DB_USER="postgres"
+  DB_PASSWORD="password"
+  DB_HOST="postgresPastebin"
+  DB_PORT="5432"
 
   REDIS_HOST="redisPastebin"
   REDIS_PORT="6379"
 
-  MINIO_END_POINT="redisPastebin"
+  MINIO_END_POINT="minioPastebin"
   MINIO_PORT="9000"
   MINIO_USE_SSL="false"
   MINIO_ACCESS_KEY="minioAccessKey"
@@ -59,8 +63,11 @@ It's a training project. I just do it when I'm bored
 - **[jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)**  
   for creating and verifying JSON Web Tokens (JWT) for secure user authentication
 
-- **[mongoose](https://www.npmjs.com/package/mongoose)**  
-  to work with mongodb
+- **[@sequelize/core](https://www.npmjs.com/package/@sequelize/core)**  
+  ORM for SQL, used to interact with PostgreSQL
+
+- **[@sequelize/postgres](https://www.npmjs.com/package/@sequelize/postgres)**  
+  PostgreSQL dialect for Sequelize
 
 - **[redis](https://www.npmjs.com/package/redis)**  
   for caching and managing session data
