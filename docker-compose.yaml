@@ -5,7 +5,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - mongo
+      - postgres
       - redis
       - minio
     networks:
@@ -13,15 +13,20 @@ services:
     env_file:
       - .env
 
-  mongo:
-    image: mongo:latest
-    container_name: mongoPastebin
+  postgres:
+    image: postgres:latest
+    container_name: postgresPastebin
     ports:
-      - "27017:27017"
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     networks:
       - pastebin_network
     volumes:
-      - mongo_data:/data/db
+      - ./src/databases/database.sql:/docker-entrypoint-initdb.d/database.sql
+      - postgres_data:/data/db
 
   redis:
     image: redis:latest
@@ -50,5 +55,5 @@ networks:
     driver: bridge
 
 volumes:
-  mongo_data: {}
+  postgres_data: {}
   minio_data: {}

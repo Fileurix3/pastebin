@@ -1,7 +1,6 @@
 import { Response } from "express";
 import cookieParser from "cookie-parser";
 import express from "express";
-import mongo from "mongoose";
 import jwt from "jsonwebtoken";
 import minioClient from "./databases/minio.js";
 import authRouter from "./services/auth/auth_router.js";

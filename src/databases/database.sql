@@ -1,4 +1,8 @@
-CREATE TABLE users (
+
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS users (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY UNIQUE,
   name VARCHAR(50) NOT NULL UNIQUE,
   email VARCHAR(100) NOT NULL UNIQUE,
@@ -8,7 +12,7 @@ CREATE TABLE users (
   "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE posts (
+CREATE TABLE IF NOT EXISTS posts (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY UNIQUE,
   creator_id uuid NOT NULL,
   title VARCHAR(255) NOT NULL,
@@ -18,7 +22,7 @@ CREATE TABLE posts (
   FOREIGN KEY (creator_id) REFERENCES users(id)
 );
 
-CREATE TABLE users_likes (
+CREATE TABLE IF NOT EXISTS users_likes (
   user_id uuid NOT NULL,
   post_id uuid NOT NULL,
   PRIMARY KEY (user_id, post_id),
