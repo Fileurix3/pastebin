@@ -1,6 +1,18 @@
 # Pastebin
 
-It's a training project. I just do it when I'm bored
+Pastebin is a training project where I hone my programming skills.
+
+## Main stack
+
+[**Express.js**]("https://expressjs.com/") is needed to create an api with which this application can be used.
+
+[**MinIO**]("https://min.io/") is needed to save the content part of the post in blob stor.
+
+[**PostgreSQL**]("https://www.postgresql.org/") is needed to save other post data such as (id, title, creator, content metadata, createAt, etc).
+
+[**Redis**]("https://redis.io/") is needed to cache frequently requested posts.
+
+[**Docker**]("https://www.docker.com/") is needed to contenterise and build the entire project in **docker-compose**.
 
 ## install
 
