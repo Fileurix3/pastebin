@@ -176,19 +176,16 @@ export class PostsServices {
       throw new CustomError("Object not found", 404);
     }
 
-    await minioClient.removeObject("posts", minioObjectName!).catch((err) => {
-      throw new Error(`Error when delete a post: ${err}`);
-    });
+    await Promise.all([
+      minioClient.removeObject("posts", minioObjectName!).catch((err) => {
+        throw new Error(`Error when delete a post: ${err}`);
+      }),
 
-    await PostModel.destroy({
-      where: {
-        id: postId,
-      },
-    });
+      PostModel.destroy({ where: { id: postId } }),
+      UserLikesModel.destroy({ where: { post_id: postId } }),
 
-    redisClient.del(`post:${postId}`).catch((err) => {
-      console.error("delete the post from redis error: " + err);
-    });
+      redisClient.del(`post:${postId}`),
+    ]);
 
     return {
       message: "The post was successfully deleted",
