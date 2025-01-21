@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { handlerError } from "../../index.js";
+import { handlerError } from "../../utils/utils.js";
 import { AuthServices } from "./auth_services.js";
 
 export class AuthController {

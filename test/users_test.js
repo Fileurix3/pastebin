@@ -1,9 +1,9 @@
 import { UserModel } from "../build/models/user_model.js";
 import { PostModel } from "../build/models/post_model.js";
+import { decodeJwt } from "../build/utils/utils.js";
 import { expect } from "chai";
-import app, { decodeJwt } from "../build/index.js";
+import app from "../build/index.js";
 import request from "supertest";
-
 import minioClient from "../build/databases/minio.js";
 
 describe("user test", () => {

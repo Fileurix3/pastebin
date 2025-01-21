@@ -1,4 +1,4 @@
-import { CustomError, handlerError } from "../../index.js";
+import { CustomError, handlerError } from "../../utils/utils.js";
 import { UserModel } from "../../models/user_model.js";
 import { Response } from "express";
 import { Op } from "@sequelize/core";

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { UsersServices } from "./users_services.js";
-import { handlerError } from "../../index.js";
+import { handlerError } from "../../utils/utils.js";
 
 export class UsersController {
   private usersServices: UsersServices;

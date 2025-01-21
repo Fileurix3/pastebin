@@ -1,4 +1,4 @@
-import { CustomError, decodeJwt } from "../../index.js";
+import { CustomError, decodeJwt } from "../../utils/utils.js";
 import { UserLikesModel } from "../../models/users_likes_model.js";
 import { PostModel } from "../../models/post_model.js";
 import { UserModel } from "../../models/user_model.js";
