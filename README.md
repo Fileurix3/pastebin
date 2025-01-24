@@ -1,120 +1,95 @@
 # Pastebin
 
-Pastebin is a training project where I hone my programming skills.
+**Pastebin** is a training project where I hone my programming skills.
 
-## Main stack
+## Main Stack
 
-[**Express.js**](https://expressjs.com/) is needed to create an api with which this application can be used.
+The core technologies used in this project are:
 
-[**MinIO**](https://min.io/) is needed to save the content part of the post in blob stor.
+- [**Express.js**](https://expressjs.com/): To create an API for the application.
+- [**MinIO**](https://min.io/): To store the content part of the post in blob storage.
+- [**PostgreSQL**](https://www.postgresql.org/): To store other post data, such as `id`, `title`, `creator`, `content metadata`, `createdAt`, etc.
+- [**Redis**](https://redis.io/): To cache frequently requested posts.
+- [**Docker**](https://www.docker.com/): To containerize and build the entire project using **docker-compose**.
 
-[**PostgreSQL**](https://www.postgresql.org/) is needed to save other post data such as (id, title, creator, content metadata, createAt, etc).
+---
 
-[**Redis**](https://redis.io/) is needed to cache frequently requested posts.
+## Installation
 
-[**Docker**](https://www.docker.com/) is needed to contenterise and build the entire project in **docker-compose**.
+Follow these steps to set up and run the project:
 
-## install
+1. **Clone the Repository**
 
-- Clone the repository
+   ```bash
+   git clone https://github.com/Fileurix3/pastebin.git
+   ```
 
-  ```bash
-  git clone https://github.com/Fileurix3/pastebin.git
-  ```
+2. **Navigate to the Project Folder**
 
-- Go to the folder with this application
+   ```bash
+   cd pastebin
+   ```
 
-  ```bash
-  cd pastebin
-  ```
+3. **Add a `.env` File**
 
-- Add an .env file with these parameters
+   Create a `.env` file in the root directory with the following parameters:
 
-  ```env
-  COOKIE_SECRET="pastebin"
-  JWT_SECRET="pastebin"
+   ```env
+   COOKIE_SECRET="pastebin"
+   JWT_SECRET="pastebin"
 
-  DB_NAME="pastebin"
-  DB_USER="postgres"
-  DB_PASSWORD="password"
-  DB_HOST="postgresPastebin"
-  DB_PORT="5432"
+   DB_NAME="pastebin"
+   DB_USER="postgres"
+   DB_PASSWORD="password"
+   DB_HOST="postgresPastebin"
+   DB_PORT="5432"
 
-  REDIS_HOST="redisPastebin"
-  REDIS_PORT="6379"
+   REDIS_HOST="redisPastebin"
+   REDIS_PORT="6379"
 
-  MINIO_END_POINT="minioPastebin"
-  MINIO_PORT="9000"
-  MINIO_USE_SSL="false"
-  MINIO_ACCESS_KEY="minioAccessKey"
-  MINIO_SECRET_KEY="minioSecretKey"
-  ```
+   MINIO_END_POINT="minioPastebin"
+   MINIO_PORT="9000"
+   MINIO_USE_SSL="false"
+   MINIO_ACCESS_KEY="minioAccessKey"
+   MINIO_SECRET_KEY="minioSecretKey"
+   ```
 
-- Run using docker compose
-  ```bash
-  docker compose up
-  ```
+4. **Run the Project Using Docker Compose**
+
+   ```bash
+   docker compose up
+   ```
+
+---
 
 ## Dependencies
 
-- **[bcrypt](https://www.npmjs.com/package/bcrypt)**  
-  for hashing passwords securely
+The project uses the following dependencies:
 
-- **[cookie-parser](https://www.npmjs.com/package/cookie-parser)**  
-  to handle cookies in Express
+### Dependencies
 
-- **[dotenv](https://www.npmjs.com/package/dotenv)**  
-  to manage environment variables from a `.env` file
+- **[bcrypt](https://www.npmjs.com/package/bcrypt)**: For securely hashing passwords.
+- **[cookie-parser](https://www.npmjs.com/package/cookie-parser)**: To handle cookies in Express.
+- **[dotenv](https://www.npmjs.com/package/dotenv)**: To manage environment variables from a `.env` file.
+- **[email-validator](https://www.npmjs.com/package/email-validator)**: A simple module to validate email addresses.
+- **[express](https://www.npmjs.com/package/express)**: A framework for building APIs and web applications.
+- **[jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)**: For creating and verifying JSON Web Tokens (JWT) for secure user authentication.
+- **[@sequelize/core](https://www.npmjs.com/package/@sequelize/core)**: ORM for SQL, used to interact with PostgreSQL.
+- **[@sequelize/postgres](https://www.npmjs.com/package/@sequelize/postgres)**: PostgreSQL dialect for Sequelize.
+- **[redis](https://www.npmjs.com/package/redis)**: For caching and managing session data.
+- **[minio](https://www.npmjs.com/package/minio)**: MinIO JavaScript Library for Amazon S3 compatible cloud storage.
 
-- **[email-validator](https://www.npmjs.com/package/email-validator)**  
-  A simple module to validate an e-mail address
+### DevDependencies
 
-- **[express](https://www.npmjs.com/package/express)**  
-  framework for building APIs and web applications
+- **[@types/bcrypt](https://www.npmjs.com/package/@types/bcrypt)**: Type definitions for bcrypt.
+- **[@types/cookie-parser](https://www.npmjs.com/package/@types/cookie-parser)**: Type definitions for cookie-parser.
+- **[@types/express](https://www.npmjs.com/package/@types/express)**: Type definitions for Express.
+- **[@types/jsonwebtoken](https://www.npmjs.com/package/@types/jsonwebtoken)**: Type definitions for jsonwebtoken.
+- **[@types/node](https://www.npmjs.com/package/@types/node)**: Type definitions for Node.js.
+- **[chai](https://www.npmjs.com/package/chai)**: An assertion library for testing.
+- **[mocha](https://www.npmjs.com/package/mocha)**: A JavaScript test framework for Node.js.
+- **[nodemon](https://www.npmjs.com/package/nodemon)**: A utility that automatically restarts the Node.js application when file changes are detected.
+- **[supertest](https://www.npmjs.com/package/supertest)**: A library for testing HTTP servers.
+- **[typescript](https://www.npmjs.com/package/typescript)**: A TypeScript compiler to add static types to JavaScript.
 
-- **[jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)**  
-  for creating and verifying JSON Web Tokens (JWT) for secure user authentication
-
-- **[@sequelize/core](https://www.npmjs.com/package/@sequelize/core)**  
-  ORM for SQL, used to interact with PostgreSQL
-
-- **[@sequelize/postgres](https://www.npmjs.com/package/@sequelize/postgres)**  
-  PostgreSQL dialect for Sequelize
-
-- **[redis](https://www.npmjs.com/package/redis)**  
-  for caching and managing session data
-
-- **[minio](https://www.npmjs.com/package/minio)**  
-  MinIO JavaScript Library for Amazon S3 Compatible Cloud Storage
-
-## Dev Dependencies
-
-- **[@types/bcrypt](https://www.npmjs.com/package/@types/bcrypt)**  
-  Type definitions for bcrypt
-
-- **[@types/cookie-parser](https://www.npmjs.com/package/@types/cookie-parser)**  
-  Type definitions for cookie-parser
-
-- **[@types/express](https://www.npmjs.com/package/@types/express)**  
-  Type definitions for Express
-
-- **[@types/jsonwebtoken](https://www.npmjs.com/package/@types/jsonwebtoken)**  
-  Type definitions for jsonwebtoken
-
-- **[@types/node](https://www.npmjs.com/package/@types/node)**  
-  Type definitions for Node.js
-
-- **[chai](https://www.npmjs.com/package/chai)**  
-  assertion library for testing
-
-- **[mocha](https://www.npmjs.com/package/mocha)**  
-  JavaScript test framework for Node.js
-
-- **[nodemon](https://www.npmjs.com/package/nodemon)**  
-  utility that automatically restarts the Node.js application when file changes are detected
-
-- **[supertest](https://www.npmjs.com/package/supertest)**  
-  library for testing HTTP servers
-
-- **[typescript](https://www.npmjs.com/package/typescript)**  
-  TypeScript compiler to add static types to JavaScript
+---
