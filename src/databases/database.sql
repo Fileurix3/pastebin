@@ -19,13 +19,13 @@ CREATE TABLE IF NOT EXISTS posts (
   content TEXT NOT NULL,
   "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  FOREIGN KEY (creator_id) REFERENCES users(id)
+  FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS users_likes (
   user_id uuid NOT NULL,
   post_id uuid NOT NULL,
   PRIMARY KEY (user_id, post_id),
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (post_id) REFERENCES posts(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );

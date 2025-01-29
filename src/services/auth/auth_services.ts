@@ -8,10 +8,16 @@ import jwt from "jsonwebtoken";
 
 export class AuthServices {
   public async register(name: string, password: string, email: string, res: Response) {
-    if (!name || !password || !email) {
-      throw new CustomError("You have not filled in all the fields", 400);
+    if (!name) {
+      throw new CustomError("Name is required", 400);
+    } else if (!password) {
+      throw new CustomError("Password is required", 400);
+    } else if (!email) {
+      throw new CustomError("Email is required", 400);
     } else if (password.length < 6) {
-      throw new CustomError("Password must be at least 6 characters long", 400);
+      throw new CustomError("Password must not be less than 6 characters", 400);
+    } else if (name.length > 20) {
+      throw new CustomError("Name length should not exceed 20 characters", 400);
     }
 
     if (!validator.validate(email)) {
@@ -53,14 +59,17 @@ export class AuthServices {
     });
 
     return {
-      message: "User successfully registered",
-      token: token,
+      message: "User has been successfully registered",
     };
   }
 
   public async login(email: string, password: string, res: Response) {
-    if (!email || !password) {
-      throw new CustomError("You have not filled in all the fields", 400);
+    if (!password) {
+      throw new CustomError("Password is required", 400);
+    } else if (!email) {
+      throw new CustomError("Email is required", 400);
+    } else if (password.length < 6) {
+      throw new CustomError("Password must not be less than 6 characters", 400);
     }
 
     const user: UserModel | null = await UserModel.findOne({
@@ -90,14 +99,13 @@ export class AuthServices {
     );
 
     res.cookie("token", token, {
-      maxAge: 7 * 26 * 60 * 60 * 1000,
+      maxAge: 7 * 25 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: "lax",
     });
 
     return {
-      message: "Login successful",
-      token: token,
+      message: "Login has been successfully",
     };
   }
 

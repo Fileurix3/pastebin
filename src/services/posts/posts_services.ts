@@ -9,8 +9,10 @@ import redisClient from "../../databases/redis";
 
 export class PostsServices {
   public async createPost(title: string, content: string, userToken: string) {
-    if (!title || !content) {
-      throw new CustomError("You have not filled in all the fields", 400);
+    if (!title) {
+      throw new CustomError("Title is required", 400);
+    } else if (!content) {
+      throw new CustomError("Content is required", 400);
     }
 
     const objectName: string = `${title
@@ -134,7 +136,7 @@ export class PostsServices {
     if (post == null) {
       throw new CustomError("Post not found", 404);
     } else if (userId != post.creator_id) {
-      throw new CustomError("Only the creator edit this post", 403);
+      throw new CustomError("Only the creator can edit this post", 403);
     }
 
     if (newTitle) {
