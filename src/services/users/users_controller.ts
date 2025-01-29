@@ -1,6 +1,5 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UsersServices } from "./users_services";
-import { handlerError } from "../../utils/utils";
 
 export class UsersController {
   private usersServices: UsersServices;
@@ -9,7 +8,11 @@ export class UsersController {
     this.usersServices = new UsersServices();
   }
 
-  public getProfileById = async (req: Request, res: Response): Promise<void> => {
+  public getProfileById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userId = req.params.userId;
       const userProfile = await this.usersServices.getProfileById(userId);
@@ -18,11 +21,15 @@ export class UsersController {
         user: userProfile,
       });
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public getYourProfile = async (req: Request, res: Response): Promise<void> => {
+  public getYourProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userToken = req.cookies.token;
       const userProfile = await this.usersServices.getYourProfile(userToken);
@@ -31,11 +38,15 @@ export class UsersController {
         user: userProfile,
       });
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public updateUserProfile = async (req: Request, res: Response): Promise<void> => {
+  public updateUserProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userToken = req.cookies.token;
       const { newAvatarUrl, newName } = req.body;
@@ -48,11 +59,15 @@ export class UsersController {
 
       res.status(200).json(message);
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public changePassword = async (req: Request, res: Response): Promise<void> => {
+  public changePassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userToken = req.cookies.token;
       const { oldPassword, newPassword } = req.body;
@@ -65,11 +80,15 @@ export class UsersController {
 
       res.status(200).json(message);
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public likePost = async (req: Request, res: Response): Promise<void> => {
+  public likePost = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userToken = req.cookies.token;
       const postId = req.params.postId;
@@ -78,7 +97,7 @@ export class UsersController {
 
       res.status(200).json(message);
     } catch (err: unknown) {
-      handlerError(err, res);
+      next(err);
     }
   };
 }

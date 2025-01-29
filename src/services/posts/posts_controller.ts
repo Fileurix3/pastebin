@@ -1,6 +1,5 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { PostsServices } from "./posts_services";
-import { handlerError } from "../../utils/utils";
 
 export class PostsController {
   private postsServices: PostsServices;
@@ -9,7 +8,11 @@ export class PostsController {
     this.postsServices = new PostsServices();
   }
 
-  public createPost = async (req: Request, res: Response): Promise<void> => {
+  public createPost = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userToken = req.cookies.token;
       const { title, content } = req.body;
@@ -17,33 +20,45 @@ export class PostsController {
 
       res.status(201).json(message);
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public getPostById = async (req: Request, res: Response): Promise<void> => {
+  public getPostById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const postId = req.params.postId;
       const post = await this.postsServices.getPostById(postId);
 
       res.status(200).json(post);
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public searchPost = async (req: Request, res: Response): Promise<void> => {
+  public searchPost = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const searchParams = req.params.params;
       const posts = await this.postsServices.searchPost(searchParams);
 
       res.status(200).json({ posts: posts });
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public updatePost = async (req: Request, res: Response): Promise<void> => {
+  public updatePost = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const postId = req.params.postId;
       const userToken = req.cookies.token;
@@ -57,11 +72,15 @@ export class PostsController {
 
       res.status(200).json(message);
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 
-  public deletePost = async (req: Request, res: Response): Promise<void> => {
+  public deletePost = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userToken = req.cookies.token;
       const postId = req.params.postId;
@@ -70,7 +89,7 @@ export class PostsController {
 
       res.status(200).json(message);
     } catch (err) {
-      handlerError(err, res);
+      next(err);
     }
   };
 }

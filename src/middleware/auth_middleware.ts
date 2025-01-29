@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { CustomError, handlerError } from "../utils/utils";
+import { CustomError } from "../utils/utils";
 import jwt from "jsonwebtoken";
 
 export async function authMiddleware(
@@ -22,6 +22,6 @@ export async function authMiddleware(
       next();
     });
   } catch (err: unknown) {
-    handlerError(err, res);
+    next(err);
   }
 }

@@ -1,4 +1,4 @@
-import { CustomError, handlerError } from "../../utils/utils";
+import { CustomError } from "../../utils/utils";
 import { UserModel } from "../../models/user_model";
 import { Response } from "express";
 import { Op } from "@sequelize/core";
@@ -110,14 +110,10 @@ export class AuthServices {
   }
 
   public async logout(res: Response) {
-    try {
-      res.clearCookie("token");
-      res.clearCookie("registered");
-      return {
-        message: "logout successfully",
-      };
-    } catch (err: unknown) {
-      handlerError(err, res);
-    }
+    res.clearCookie("token");
+    res.clearCookie("registered");
+    return {
+      message: "logout successfully",
+    };
   }
 }

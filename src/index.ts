@@ -7,6 +7,7 @@ import authRouter from "./services/auth/auth_router";
 import sequelize from "./databases/db";
 import express from "express";
 import "dotenv/config";
+import { errorMiddleware } from "./middleware/error_middleware";
 
 const app = express();
 
@@ -31,6 +32,8 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use("/auth", authRouter);
 app.use("/post", postsRouter);
 app.use("/user", usersRouter);
+
+app.use(errorMiddleware);
 
 if (process.env.NODE_ENV != "test") {
   const PORT = process.env.PORT || 3000;

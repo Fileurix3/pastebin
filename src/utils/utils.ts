@@ -10,19 +10,6 @@ export class CustomError extends Error {
   }
 }
 
-export function handlerError(err: unknown, res: Response): Response {
-  if (err instanceof CustomError) {
-    return res.status(err.statusCode).json({
-      message: err.message,
-    });
-  } else {
-    console.error(err);
-    return res.status(500).json({
-      message: (err as Error).message || "Unknown error",
-    });
-  }
-}
-
 export function decodeJwt(token: string): Record<string, string> {
   jwt.verify(token, process.env.JWT_SECRET as string, (err: unknown) => {
     if (err) {
