@@ -1,10 +1,10 @@
 import cookieParser from "cookie-parser";
-import minioClient from "./databases/minio.js";
-import postsRouter from "./services/posts/posts_router.js";
-import usersRouter from "./services/users/users_router.js";
-import redisClient from "./databases/redis.js";
-import authRouter from "./services/auth/auth_router.js";
-import sequelize from "./databases/db.js";
+import minioClient from "./databases/minio";
+import postsRouter from "./services/posts/posts_router";
+import usersRouter from "./services/users/users_router";
+import redisClient from "./databases/redis";
+import authRouter from "./services/auth/auth_router";
+import sequelize from "./databases/db";
 import express from "express";
 import "dotenv/config";
 

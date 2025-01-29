@@ -1,11 +1,11 @@
-import { CustomError, decodeJwt } from "../../utils/utils.js";
-import { UserLikesModel } from "../../models/users_likes_model.js";
-import { PostModel } from "../../models/post_model.js";
-import { UserModel } from "../../models/user_model.js";
+import { CustomError, decodeJwt } from "../../utils/utils";
+import { UserLikesModel } from "../../models/users_likes_model";
+import { PostModel } from "../../models/post_model";
+import { UserModel } from "../../models/user_model";
 import { Stream } from "stream";
 import { Op } from "@sequelize/core";
-import minioClient from "../../databases/minio.js";
-import redisClient from "../../databases/redis.js";
+import minioClient from "../../databases/minio";
+import redisClient from "../../databases/redis";
 
 export class PostsServices {
   public async createPost(title: string, content: string, userToken: string) {

@@ -32,6 +32,6 @@ async function createBucket() {
   }
 }
 
-await createBucket();
+createBucket();
 
 export default minioClient;

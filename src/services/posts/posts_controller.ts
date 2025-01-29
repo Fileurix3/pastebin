@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { PostsServices } from "./posts_services.js";
-import { handlerError } from "../../utils/utils.js";
+import { PostsServices } from "./posts_services";
+import { handlerError } from "../../utils/utils";
 
 export class PostsController {
   private postsServices: PostsServices;

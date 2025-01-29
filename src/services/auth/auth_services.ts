@@ -1,5 +1,5 @@
-import { CustomError, handlerError } from "../../utils/utils.js";
-import { UserModel } from "../../models/user_model.js";
+import { CustomError, handlerError } from "../../utils/utils";
+import { UserModel } from "../../models/user_model";
 import { Response } from "express";
 import { Op } from "@sequelize/core";
 import validator from "email-validator";

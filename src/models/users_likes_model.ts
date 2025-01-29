@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "@sequelize/core";
-import { UserModel } from "./user_model.js";
-import { PostModel } from "./post_model.js";
-import sequelize from "../databases/db.js";
+import { UserModel } from "./user_model";
+import { PostModel } from "./post_model";
+import sequelize from "../databases/db";
 
 interface UserLikesAttributes {
   user_id: string;

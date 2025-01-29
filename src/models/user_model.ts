@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "@sequelize/core";
-import sequelize from "../databases/db.js";
+import sequelize from "../databases/db";
 
 interface UserAttributes {
   id?: string;

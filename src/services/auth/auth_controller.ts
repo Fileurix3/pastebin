@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { handlerError } from "../../utils/utils.js";
-import { AuthServices } from "./auth_services.js";
+import { handlerError } from "../../utils/utils";
+import { AuthServices } from "./auth_services";
 
 export class AuthController {
   private authServices: AuthServices;
