@@ -107,8 +107,8 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts", "test/**/*.ts", "test/jest.config.js"],
+  "exclude": ["node_modules", "test"],
   "lib": ["ESNext"],
   "ts-node": { "esm": true }
 }
