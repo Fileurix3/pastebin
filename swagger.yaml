@@ -1,0 +1,451 @@
+openapi: 3.0.3
+info:
+  title: Pastebin api documentation
+
+servers:
+  - url: "http://localhost:3000"
+
+tags:
+  - name: auth
+    description: auth
+
+  - name: post
+    description: posts
+
+  - name: user
+    description: users
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: register a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  example: "example@example.com"
+                name:
+                  type: string
+                  example: "example name"
+                password:
+                  type: string
+                  example: "example password"
+      responses:
+        201:
+          description: register successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "User has been successfully registered"
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  example: "example@example.com"
+                password:
+                  type: string
+                  example: "example password"
+      responses:
+        200:
+          description: login successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "Login has been successfully"
+
+  /auth/logout:
+    get:
+      tags:
+        - auth
+      summary: logout a user
+      responses:
+        200:
+          description: logout successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "logout successfully"
+
+  /post/create:
+    post:
+      tags:
+        - post
+      summary: create new post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                title:
+                  type: string
+                  example: "example post title"
+                content:
+                  type: string
+                  example: "example post content"
+      responses:
+        200:
+          description: "Post was successfully created"
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "Post was successfully created"
+                  post:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "post id"
+                      title:
+                        type: string
+                        example: "post title"
+                      creator_id:
+                        type: string
+                        example: "creator id"
+
+  /post/{postId}:
+    get:
+      tags:
+        - post
+      summary: get post by id
+      parameters:
+        - name: postId
+          in: path
+          description: "post id"
+          required: true
+          schema:
+            type: integer
+            format: postId
+      responses:
+        200:
+          description: get the post successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "postId"
+                  title:
+                    type: string
+                    example: "post title"
+                  content:
+                    type: string
+                    example: "post content"
+                  countLikes:
+                    type: integer
+                    example: 0
+                  creator:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "creator id"
+                      name:
+                        type: string
+                        example: "creator name"
+                      avatar_url:
+                        type: string
+                        example: "creator avatar"
+
+  /post/search/{params}:
+    get:
+      tags:
+        - post
+      summary: get post by params
+      parameters:
+        - name: post title element
+          in: path
+          description: "post title element"
+          required: true
+          schema:
+            type: string
+            format: params
+      responses:
+        200:
+          description: get the posts successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                example:
+                  - id: "post id 1"
+                    title: "post title 1"
+                    creator_id: "creator id 1"
+                  - id: "post id 2"
+                    title: "post title 2"
+                    creator_id: "creator id 2"
+
+  /post/update/{postId}:
+    put:
+      tags:
+        - post
+      summary: update post
+      parameters:
+        - name: postId
+          in: path
+          description: "post id"
+          required: true
+          schema:
+            type: integer
+            format: postId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                newTitle:
+                  type: string
+                  example: "example post title"
+                newContent:
+                  type: string
+                  example: "example post content"
+      responses:
+        200:
+          description: "Post was successfully created"
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "Post was successfully updated"
+
+  /post/delete/{postId}:
+    delete:
+      tags:
+        - post
+      summary: delete post
+      parameters:
+        - name: postId
+          in: path
+          description: "post id"
+          required: true
+          schema:
+            type: integer
+            format: postId
+      responses:
+        200:
+          description: "The post was successfully deleted"
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "The post was successfully deleted"
+
+  /user/profile/{userId}:
+    get:
+      tags:
+        - user
+      summary: get user profile by id
+      parameters:
+        - name: userId
+          in: path
+          description: "user id"
+          required: true
+          schema:
+            type: integer
+            format: userId
+      responses:
+        200:
+          description: get the user successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "userId"
+                      name:
+                        type: string
+                        example: "user name"
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2021-01-01T12:00:00Z"
+                      avatar_url:
+                        type: string
+                        example: "user avatar"
+                      posts:
+                        type: array
+                        example:
+                          - id: "post id 1"
+                            title: "post title 1"
+                            createdAt: "2021-01-01T12:00:00Z"
+                          - id: "post id 2"
+                            title: "post title 2"
+                            createdAt: "2021-01-01T12:00:00Z"
+                      likedPosts:
+                        type: array
+                        example:
+                          - post_id: "post id 1"
+                            post:
+                              title: "post title 1"
+                          - post_id: "post id 2"
+                            post:
+                              title: post title 2"
+
+  /user/profile:
+    get:
+      tags:
+        - user
+      summary: get your profile using the jwt token
+      responses:
+        200:
+          description: get profile successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "userId"
+                      name:
+                        type: string
+                        example: "user name"
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2021-01-01T12:00:00Z"
+                      avatar_url:
+                        type: string
+                        example: "user avatar"
+                      posts:
+                        type: array
+                        example:
+                          - id: "post id 1"
+                            title: "post title 1"
+                            createdAt: "2021-01-01T12:00:00Z"
+                          - id: "post id 2"
+                            title: "post title 2"
+                            createdAt: "2021-01-01T12:00:00Z"
+                      likedPosts:
+                        type: array
+                        example:
+                          - post_id: "post id 1"
+                            post:
+                              title: "post title 1"
+                          - post_id: "post id 2"
+                            post:
+                              title: post title 2"
+  /user/update/profile:
+    put:
+      tags:
+        - user
+      summary: update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                newName:
+                  type: string
+                  example: "example name"
+                newAvatarUrl:
+                  type: string
+                  example: "example avatar url"
+      responses:
+        200:
+          description: "User profile was successfully update"
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "User profile was successfully update"
+
+  /user/change/password:
+    put:
+      tags:
+        - user
+      summary: change user password
+      description: the old password and the new password must not be the same
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                oldPassword:
+                  type: string
+                  example: "example old password"
+                newPassword:
+                  type: string
+                  example: "example new password"
+      responses:
+        200:
+          description: "Password was successfully update"
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "Password was successfully update"
+
+  user/like/post/{postId}:
+    put:
+      tags:
+        - user
+      summary: liked the post
+      description: liked this post if the post has already been liked, remove the post from likes
+      parameters:
+        - name: postId
+          in: path
+          description: "post id"
+          required: true
+          schema:
+            type: integer
+            format: postId
+      responses:
+        200:
+          description: "liked this post, if you have already liked it, the answer is '{message: The post was successfully removed from likes}'"
+          content:
+            application/json:
+              schema:
+                properties:
+                  massage:
+                    type: string
+                    example: "The post was successfully added to likes"
