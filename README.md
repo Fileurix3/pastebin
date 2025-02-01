@@ -11,8 +11,9 @@ The core technologies used in this project are:
 - [**PostgreSQL**](https://www.postgresql.org/): To store other post data, such as `id`, `title`, `creator`, `content metadata`, `createdAt`, etc.
 - [**Redis**](https://redis.io/): To cache frequently requested posts.
 - [**Docker**](https://www.docker.com/): To containerize and build the entire project using **docker-compose**.
-- [**jest**](https://jestjs.io/) + [**supertest**](https://github.com/ladjs/supertest#readme): To test this project.
 - [**Swagger**](https://swagger.io/): For the documentation api.
+- [**Sequelize**](https://sequelize.org/): ORM from SQL.
+- [**jest**](https://jestjs.io/) + [**supertest**](https://github.com/ladjs/supertest#readme): To test this project.
 
 ---
 
