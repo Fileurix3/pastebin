@@ -1,8 +1,10 @@
 import { UserModel } from "../src/models/user_model";
+import { PostModel } from "../src/models/post_model";
 import request from "supertest";
 import app from "../src/index";
-import { PostModel } from "../src/models/post_model";
-import minioClient from "../src/databases/minio";
+import { S3Service } from "../src/services/s3/s3_service";
+
+const s3Service: S3Service = new S3Service();
 
 describe("post test", () => {
   let userToken: string;
@@ -146,7 +148,7 @@ describe("post test", () => {
     });
 
     if (postMinioName) {
-      await minioClient.removeObject("posts", postMinioName);
+      await s3Service.removeObject(postMinioName);
     }
 
     await UserModel.destroy({

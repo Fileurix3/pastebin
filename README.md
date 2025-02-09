@@ -50,9 +50,9 @@ Follow these steps to set up and run the project:
    REDIS_HOST="redisPastebin"
    REDIS_PORT="6379"
 
+   MINIO_REGION="us-east-1"
    MINIO_END_POINT="minioPastebin"
    MINIO_PORT="9000"
-   MINIO_USE_SSL="false"
    MINIO_ACCESS_KEY="minioAccessKey"
    MINIO_SECRET_KEY="minioSecretKey"
    ```

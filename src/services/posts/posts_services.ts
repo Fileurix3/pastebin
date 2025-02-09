@@ -1,13 +1,16 @@
 import { CustomError, decodeJwt } from "../../utils/utils";
 import { UserLikesModel } from "../../models/users_likes_model";
 import { PostModel } from "../../models/post_model";
+import { S3Service } from "../s3/s3_service";
 import { UserModel } from "../../models/user_model";
 import { Stream } from "stream";
 import { Op } from "@sequelize/core";
-import minioClient from "../../databases/minio";
+//import minioClient from "../../databases/minio";
 import redisClient from "../../databases/redis";
 
 export class PostsServices {
+  private s3Client: S3Service = new S3Service();
+
   public async createPost(title: string, content: string, userToken: string) {
     if (!title) {
       throw new CustomError("Title is required", 400);
@@ -19,7 +22,7 @@ export class PostsServices {
       .replace(/[^a-zA-Z0-9]/g, " ")
       .replace(/\s+/g, "-")}:${Date.now()}`;
 
-    await minioClient.putObject("posts", objectName, content);
+    await this.s3Client.putObject(objectName, content);
 
     const userId: string = decodeJwt(userToken).userId;
 
@@ -40,7 +43,7 @@ export class PostsServices {
 
     if (cachedPost) {
       const post = JSON.parse(cachedPost);
-      const postContent = await this.getPostBodyFromMinio(
+      const postContent = await this.s3Client.getObject(
         post.content.split(/\//).pop() as string,
       );
 
@@ -77,33 +80,13 @@ export class PostsServices {
 
     redisClient.setEx(`post:${postId}`, 3600, JSON.stringify(post));
 
-    const postContent = await this.getPostBodyFromMinio(
+    const postContent = await this.s3Client.getObject(
       post.content.split(/\//).pop() as string,
     );
 
     post.content = postContent;
     return post;
   };
-
-  private getPostBodyFromMinio(objectName: string): Promise<string> {
-    return new Promise<string>(async (resolve, reject) => {
-      const minioObject: Stream = await minioClient.getObject("posts", objectName);
-
-      let data: string = "";
-
-      minioObject.on("data", (chunk) => {
-        data += chunk;
-      });
-
-      minioObject.on("end", () => {
-        resolve(data);
-      });
-
-      minioObject.on("error", (err) => {
-        reject(err);
-      });
-    });
-  }
 
   public async searchPost(searchParams: string) {
     const posts: PostModel[] = await PostModel.findAll({
@@ -145,7 +128,7 @@ export class PostsServices {
 
     if (newContent) {
       const objectName = post.content.split(/\//).pop();
-      await minioClient.putObject("posts", objectName!, newContent);
+      await this.s3Client.putObject(objectName!, newContent);
     }
 
     redisClient.del(`post:${postId}`).catch((err) => {
@@ -179,7 +162,7 @@ export class PostsServices {
     }
 
     await Promise.all([
-      minioClient.removeObject("posts", minioObjectName!).catch((err) => {
+      this.s3Client.removeObject(minioObjectName!).catch((err) => {
         throw new Error(`Error when delete a post: ${err}`);
       }),
 

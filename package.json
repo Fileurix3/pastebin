@@ -30,6 +30,7 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.744.0",
     "@sequelize/core": "^7.0.0-alpha.43",
     "@sequelize/postgres": "^7.0.0-alpha.43",
     "bcrypt": "^5.1.1",
@@ -38,7 +39,6 @@
     "email-validator": "^2.0.4",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "minio": "^8.0.3",
     "redis": "^4.7.0",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
