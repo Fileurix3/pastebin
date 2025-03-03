@@ -1,16 +1,16 @@
 import { errorMiddleware } from "./middleware/error_middleware";
+import { PostsController } from "./services/posts/posts_controller";
+import { AuthController } from "./services/auth/auth_controller";
+import { UsersController } from "./services/users/users_controller";
+import { S3Service } from "./services/s3/s3_service";
 import cookieParser from "cookie-parser";
-import postsRouter from "./services/posts/posts_router";
-import usersRouter from "./services/users/users_router";
 import redisClient from "./databases/redis";
-import authRouter from "./services/auth/auth_router";
 import swaggerUi from "swagger-ui-express";
 import sequelize from "./databases/db";
 import express from "express";
 import yaml from "yamljs";
 import path from "path";
 import "dotenv/config";
-import { S3Service } from "./services/s3/s3_service";
 
 const app = express();
 const swaggerDocument = yaml.load(path.join(__dirname, "../swagger.yaml"));
@@ -32,9 +32,14 @@ app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use("/auth", authRouter);
-app.use("/post", postsRouter);
-app.use("/user", usersRouter);
+const authController = new AuthController();
+app.use("/auth", authController.router);
+
+const postsController = new PostsController();
+app.use("/post", postsController.router);
+
+const usersController = new UsersController();
+app.use("/user", usersController.router);
 
 app.use(errorMiddleware);
 
